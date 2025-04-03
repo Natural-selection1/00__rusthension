@@ -1,0 +1,21 @@
+[package]
+name = "rusthension"
+version = "0.1.0"
+edition = "2024"
+
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2.0.100", features = [
+    "full",
+    "visit-mut",
+    "visit",
+    "test",
+    "fold",
+    "extra-traits",
+] }
+quote = "1.0.40"
+proc-macro2 = "1.0.94"
+chrono = "0.4.40"
