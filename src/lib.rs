@@ -1,9 +1,7 @@
-#![allow(unused)]
-
 use crate::iter_clause::BareIfClause;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{ExprPath, parse::ParseStream};
+use syn::parse::ParseStream;
 
 #[proc_macro]
 pub fn rusthension(token_stream: TokenStream) -> TokenStream {
@@ -56,11 +54,10 @@ impl quote::ToTokens for Comprehension {
         while let Some(iter_clause) = iter_clauses.pop() {
             let iterable = &iter_clause.for_in_clause.iterable;
 
-            // 一些检查项
-            let is_clone = is_clone(iterable);
-            let length = iter_clauses.len();
-
-            let iterable_code = if length == 0 || is_clone {
+            // 生成可迭代对象的代码
+            let iterable_code = if iter_clauses.is_empty()
+                || matches!(iterable, syn::Expr::MethodCall(node) if node.method == "clone")
+            {
                 quote! { #iterable }
             } else {
                 match iterable {
@@ -70,7 +67,7 @@ impl quote::ToTokens for Comprehension {
                         );
                     }
                     syn::Expr::Range(_) => quote! { #iterable.clone() },
-                    syn::Expr::Path(ExprPath { path, .. }) => {
+                    syn::Expr::Path(_) => {
                         need_to_shadow.push(iterable.clone());
 
                         quote! { #iterable.clone() }
@@ -103,18 +100,21 @@ impl quote::ToTokens for Comprehension {
             nested_code = current_loop;
         }
 
-        while let Some(shadowed) = need_to_shadow.pop() {
-            nested_code = quote! {
-                let #shadowed = #shadowed;
-                #nested_code
-            };
-        }
+        let output_code = {
+            // 为需要影子变量的变量添加声明
+            while let Some(shadowed) = need_to_shadow.pop() {
+                nested_code = quote! {
+                    let #shadowed = #shadowed;
+                    #nested_code
+                };
+            }
 
-        let output_code = quote! {
-            {
-                let mut __rusthension_list_result = Vec::new();
-                #nested_code
-                __rusthension_list_result
+            quote! {
+                {
+                    let mut __rusthension_list_result = Vec::new();
+                    #nested_code
+                    __rusthension_list_result
+                }
             }
         };
 
@@ -143,38 +143,6 @@ mod mapping;
 
 use iter_clause::IterClause;
 use mapping::{Mapping, MappingElse};
-
-fn is_range(iterable: &syn::Expr) -> bool {
-    matches!(iterable, syn::Expr::Range(_))
-}
-fn is_ref(iterable: &syn::Expr) -> bool {
-    matches!(iterable, syn::Expr::Reference(_))
-}
-fn is_path(iterable: &syn::Expr) -> bool {
-    matches!(iterable, syn::Expr::Path(_))
-}
-fn is_clone(iterable: &syn::Expr) -> bool {
-    match iterable {
-        syn::Expr::MethodCall(node) => node.method == "clone",
-        _ => false,
-    }
-}
-
-#[test]
-fn check_is_clone() {
-    let expr = syn::parse_quote! {
-        x.clone()
-    };
-    assert!(is_clone(&expr));
-    let expr = syn::parse_quote! {
-        x.hey().clone()
-    };
-    assert!(is_clone(&expr));
-    let expr = syn::parse_quote! {
-        x.clone().hey()
-    };
-    assert!(!is_clone(&expr));
-}
 
 #[cfg(test)]
 mod tests {

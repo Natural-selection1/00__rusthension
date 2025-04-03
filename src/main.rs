@@ -43,14 +43,16 @@ fn main() {
     {
         let vec_1 = vec![("a", 1), ("b", 2), ("c", 3)];
         let vec_2 = vec![("a", 1), ("b", 2), ("c", 3)];
+        let vec_3 = vec![("a", 1), ("b", 2), ("c", 3)];
         let result = rusthension![
-            y if x > y else y
-            for x in vec_1
-            for y in &vec_2
+            y if x > *z else y
+            for x in vec_1.clone()
+            for y in vec_2
+            for z in &vec_3
         ];
 
         println!("{:?}", vec_1);
-        println!("{:?}", vec_2);
+        // println!("{:?}", vec_2);
         println!("{:?}", result);
     }
 }
