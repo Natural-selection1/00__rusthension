@@ -17,6 +17,7 @@ pub fn rusthension(token_stream: TokenStream) -> TokenStream {
 }
 
 /*-----------------Comprehension------------------- */
+#[derive(Debug)]
 struct Comprehension {
     mapping: Mapping,
     iter_clauses: Vec<IterClause>,

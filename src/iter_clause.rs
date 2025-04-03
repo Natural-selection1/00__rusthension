@@ -2,7 +2,7 @@ use syn::Token;
 use syn::parse::ParseStream;
 
 /*-----------------IterClause------------------- */
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct IterClause {
     pub for_in_clause: ForInClause,
     pub if_clause: Option<BareIfClause>,
@@ -24,7 +24,7 @@ impl syn::parse::Parse for IterClause {
 }
 
 /*-----------------ForInClause------------------- */
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ForInClause {
     pub pat: syn::Pat,
     pub iterable: syn::Expr,
@@ -44,7 +44,7 @@ impl syn::parse::Parse for ForInClause {
 }
 
 /*-----------------BareIfClause------------------- */
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct BareIfClause {
     pub expr: syn::Expr,
 }

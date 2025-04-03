@@ -5,6 +5,7 @@ use syn::parse::ParseStream;
 use syn::parse_quote;
 
 /*-----------------Mapping------------------- */
+#[derive(Debug)]
 pub struct Mapping {
     pub left_expr: syn::Expr,
     pub right_expr: Option<MappingElse>,
@@ -27,6 +28,7 @@ impl syn::parse::Parse for Mapping {
 
 /*-----------------MappingElse------------------- */
 
+#[derive(Debug)]
 pub struct MappingElse {
     pub conditions: syn::Expr,
     pub else_expr: syn::Expr,
