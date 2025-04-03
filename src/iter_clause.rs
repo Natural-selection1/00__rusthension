@@ -1,3 +1,4 @@
+use syn::Expr;
 use syn::Token;
 use syn::parse::ParseStream;
 
@@ -27,7 +28,7 @@ impl syn::parse::Parse for IterClause {
 #[derive(Debug, Clone)]
 pub struct ForInClause {
     pub pat: syn::Pat,
-    pub iterable: syn::Expr,
+    pub iterable: Expr,
 }
 
 impl syn::parse::Parse for ForInClause {
@@ -38,7 +39,7 @@ impl syn::parse::Parse for ForInClause {
 
         Ok(Self {
             pat,
-            iterable: input.parse::<syn::Expr>()?,
+            iterable: input.parse::<Expr>()?,
         })
     }
 }
@@ -46,14 +47,14 @@ impl syn::parse::Parse for ForInClause {
 /*-----------------BareIfClause------------------- */
 #[derive(Debug, Clone)]
 pub struct BareIfClause {
-    pub expr: syn::Expr,
+    pub expr: Expr,
 }
 
 impl syn::parse::Parse for BareIfClause {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<Token![if]>()?;
         Ok(Self {
-            expr: input.parse::<syn::Expr>()?,
+            expr: input.parse::<Expr>()?,
         })
     }
 }
@@ -72,10 +73,7 @@ mod tests {
             for x in vec![1, 2, 3]
         };
         assert!(matches!(iter_clause.for_in_clause.pat, syn::Pat::Ident(_)));
-        assert!(matches!(
-            iter_clause.for_in_clause.iterable,
-            syn::Expr::Macro(_)
-        ));
+        assert!(matches!(iter_clause.for_in_clause.iterable, Expr::Macro(_)));
         assert!(iter_clause.if_clause.is_none());
         eprintln!("IterClause基本for-in子句测试通过");
 
@@ -84,13 +82,10 @@ mod tests {
             for x in items if x > 0
         };
         assert!(matches!(iter_clause.for_in_clause.pat, syn::Pat::Ident(_)));
-        assert!(matches!(
-            iter_clause.for_in_clause.iterable,
-            syn::Expr::Path(_)
-        ));
+        assert!(matches!(iter_clause.for_in_clause.iterable, Expr::Path(_)));
         assert!(iter_clause.if_clause.is_some());
         if let Some(if_clause) = &iter_clause.if_clause {
-            assert!(matches!(if_clause.expr, syn::Expr::Binary(_)));
+            assert!(matches!(if_clause.expr, Expr::Binary(_)));
         }
         eprintln!("IterClause带if条件的for-in子句测试通过");
 
@@ -99,10 +94,7 @@ mod tests {
             for (x, y) in pairs
         };
         assert!(matches!(iter_clause.for_in_clause.pat, syn::Pat::Tuple(_)));
-        assert!(matches!(
-            iter_clause.for_in_clause.iterable,
-            syn::Expr::Path(_)
-        ));
+        assert!(matches!(iter_clause.for_in_clause.iterable, Expr::Path(_)));
         assert!(iter_clause.if_clause.is_none());
         eprintln!("IterClause复杂模式的for-in子句测试通过");
 
@@ -113,11 +105,11 @@ mod tests {
         assert!(matches!(iter_clause.for_in_clause.pat, syn::Pat::Ident(_)));
         assert!(matches!(
             iter_clause.for_in_clause.iterable,
-            syn::Expr::MethodCall(_)
+            Expr::MethodCall(_)
         ));
         assert!(iter_clause.if_clause.is_some());
         if let Some(if_clause) = &iter_clause.if_clause {
-            assert!(matches!(if_clause.expr, syn::Expr::Binary(_)));
+            assert!(matches!(if_clause.expr, Expr::Binary(_)));
         }
         eprintln!("IterClause复杂表达式的for-in子句测试通过");
     }
@@ -129,7 +121,7 @@ mod tests {
             for x in items
         };
         assert!(matches!(for_in_clause.pat, syn::Pat::Ident(_)));
-        assert!(matches!(for_in_clause.iterable, syn::Expr::Path(_)));
+        assert!(matches!(for_in_clause.iterable, Expr::Path(_)));
         eprintln!("ForInClause基本解析测试通过");
 
         // 测试复杂模式的for-in子句解析
@@ -137,7 +129,7 @@ mod tests {
             for (a, b, c) in tuples
         };
         assert!(matches!(for_in_clause.pat, syn::Pat::Tuple(_)));
-        assert!(matches!(for_in_clause.iterable, syn::Expr::Path(_)));
+        assert!(matches!(for_in_clause.iterable, Expr::Path(_)));
         eprintln!("ForInClause复杂模式解析测试通过");
 
         // 测试复杂表达式的for-in子句解析
@@ -145,7 +137,7 @@ mod tests {
             for x in (0..10).filter(|n| n % 2 == 0)
         };
         assert!(matches!(for_in_clause.pat, syn::Pat::Ident(_)));
-        assert!(matches!(for_in_clause.iterable, syn::Expr::MethodCall(_)));
+        assert!(matches!(for_in_clause.iterable, Expr::MethodCall(_)));
         eprintln!("ForInClause复杂表达式解析测试通过");
     }
 
@@ -155,21 +147,21 @@ mod tests {
         let if_clause: BareIfClause = parse_quote! {
             if x > 0
         };
-        assert!(matches!(if_clause.expr, syn::Expr::Binary(_)));
+        assert!(matches!(if_clause.expr, Expr::Binary(_)));
         eprintln!("BareIfClause基本条件表达式测试通过");
 
         // 测试复杂条件表达式解析
         let if_clause: BareIfClause = parse_quote! {
             if x > 0 && y < 10 || z == 5
         };
-        assert!(matches!(if_clause.expr, syn::Expr::Binary(_)));
+        assert!(matches!(if_clause.expr, Expr::Binary(_)));
         eprintln!("BareIfClause复杂条件表达式测试通过");
 
         // 测试函数调用条件表达式解析
         let if_clause: BareIfClause = parse_quote! {
             if is_valid(x) && x.len() > 0
         };
-        assert!(matches!(if_clause.expr, syn::Expr::Binary(_)));
+        assert!(matches!(if_clause.expr, Expr::Binary(_)));
         eprintln!("BareIfClause函数调用条件表达式测试通过");
     }
 }

@@ -1,3 +1,4 @@
+use syn::Expr;
 use syn::Token;
 use syn::parse::ParseStream;
 
@@ -7,14 +8,14 @@ use syn::parse_quote;
 /*-----------------Mapping------------------- */
 #[derive(Debug)]
 pub struct Mapping {
-    pub left_expr: syn::Expr,
+    pub left_expr: Expr,
     pub right_expr: Option<MappingElse>,
 }
 
 impl syn::parse::Parse for Mapping {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut mapping = Mapping {
-            left_expr: input.parse::<syn::Expr>()?,
+            left_expr: input.parse::<Expr>()?,
             right_expr: None,
         };
 
@@ -30,8 +31,8 @@ impl syn::parse::Parse for Mapping {
 
 #[derive(Debug)]
 pub struct MappingElse {
-    pub conditions: syn::Expr,
-    pub else_expr: syn::Expr,
+    pub conditions: Expr,
+    pub else_expr: Expr,
 }
 
 impl syn::parse::Parse for MappingElse {
@@ -42,7 +43,7 @@ impl syn::parse::Parse for MappingElse {
 
         Ok(Self {
             conditions,
-            else_expr: input.parse::<syn::Expr>()?,
+            else_expr: input.parse::<Expr>()?,
         })
     }
 }
@@ -57,7 +58,7 @@ mod tests {
         let mapping: Mapping = parse_quote! {
             x * 2 ** 2
         };
-        assert!(matches!(mapping.left_expr, syn::Expr::Binary(_)));
+        assert!(matches!(mapping.left_expr, Expr::Binary(_)));
         assert!(mapping.right_expr.is_none());
         eprintln!("Mapping基本表达式测试通过");
     }
@@ -67,11 +68,11 @@ mod tests {
         let mapping: Mapping = parse_quote! {
             x * 2 if x > 0 && y < 10 else 0
         };
-        assert!(matches!(mapping.left_expr, syn::Expr::Binary(_)));
+        assert!(matches!(mapping.left_expr, Expr::Binary(_)));
         assert!(mapping.right_expr.is_some());
         if let Some(mapping_else) = &mapping.right_expr {
-            assert!(matches!(mapping_else.conditions, syn::Expr::Binary(_)));
-            assert!(matches!(mapping_else.else_expr, syn::Expr::Lit(_)));
+            assert!(matches!(mapping_else.conditions, Expr::Binary(_)));
+            assert!(matches!(mapping_else.else_expr, Expr::Lit(_)));
         }
         eprintln!("Mapping带条件表达式测试通过");
     }
@@ -81,7 +82,7 @@ mod tests {
         let mapping: Mapping = parse_quote! {
             (x, y, z) if x > 0 && y < 10 else (0, 0, 0)
         };
-        assert!(matches!(mapping.left_expr, syn::Expr::Tuple(_)));
+        assert!(matches!(mapping.left_expr, Expr::Tuple(_)));
         assert!(mapping.right_expr.is_some());
         eprintln!("Mapping复杂表达式测试通过");
     }
