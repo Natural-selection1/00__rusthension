@@ -3,7 +3,7 @@
 use crate::iter_clause::BareIfClause;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::parse::ParseStream;
+use syn::{ExprPath, parse::ParseStream};
 
 #[proc_macro]
 pub fn rusthension(token_stream: TokenStream) -> TokenStream {
@@ -45,23 +45,38 @@ impl quote::ToTokens for Comprehension {
             }
         };
 
+        // fixme: 只使用引用, 不克隆本体
+        let mut need_to_shadow = vec![];
+
         // 克隆并反序iter_clauses (不知道是不是能直接取反序引用的列表?)
         let mut iter_clauses = self.iter_clauses.clone();
         iter_clauses.reverse();
 
         // 遍历已经反序的iter_clauses
         while let Some(iter_clause) = iter_clauses.pop() {
-            // 一些检查
-            let is_range = is_range(&iter_clause.for_in_clause.iterable);
-            let is_ref = is_ref(&iter_clause.for_in_clause.iterable);
-            let length = self.iter_clauses.len();
-
             let iterable = &iter_clause.for_in_clause.iterable;
 
-            let iterable_code = if is_range {
-                quote! { #iterable.clone() }
-            } else {
+            // 一些检查项
+            let is_clone = is_clone(iterable);
+            let length = iter_clauses.len();
+
+            let iterable_code = if length == 0 || is_clone {
                 quote! { #iterable }
+            } else {
+                match iterable {
+                    syn::Expr::Reference(_) => {
+                        panic!(
+                            "can't use reference in inner loop, maybe change &iterable<T> to iterable<&T>"
+                        );
+                    }
+                    syn::Expr::Range(_) => quote! { #iterable.clone() },
+                    syn::Expr::Path(ExprPath { path, .. }) => {
+                        need_to_shadow.push(iterable.clone());
+
+                        quote! { #iterable.clone() }
+                    }
+                    _ => quote! { #iterable.clone() },
+                }
             };
 
             // 根据是否有if条件生成循环代码
@@ -86,6 +101,13 @@ impl quote::ToTokens for Comprehension {
             };
 
             nested_code = current_loop;
+        }
+
+        while let Some(shadowed) = need_to_shadow.pop() {
+            nested_code = quote! {
+                let #shadowed = #shadowed;
+                #nested_code
+            };
         }
 
         let output_code = quote! {
@@ -125,9 +147,33 @@ use mapping::{Mapping, MappingElse};
 fn is_range(iterable: &syn::Expr) -> bool {
     matches!(iterable, syn::Expr::Range(_))
 }
-
 fn is_ref(iterable: &syn::Expr) -> bool {
     matches!(iterable, syn::Expr::Reference(_))
+}
+fn is_path(iterable: &syn::Expr) -> bool {
+    matches!(iterable, syn::Expr::Path(_))
+}
+fn is_clone(iterable: &syn::Expr) -> bool {
+    match iterable {
+        syn::Expr::MethodCall(node) => node.method == "clone",
+        _ => false,
+    }
+}
+
+#[test]
+fn check_is_clone() {
+    let expr = syn::parse_quote! {
+        x.clone()
+    };
+    assert!(is_clone(&expr));
+    let expr = syn::parse_quote! {
+        x.hey().clone()
+    };
+    assert!(is_clone(&expr));
+    let expr = syn::parse_quote! {
+        x.clone().hey()
+    };
+    assert!(!is_clone(&expr));
 }
 
 #[cfg(test)]
@@ -263,45 +309,4 @@ mod tests {
         ));
         eprintln!("Comprehension使用复杂表达式的列表推导式测试通过");
     }
-}
-
-use syn::{ExprMethodCall, visit_mut::VisitMut};
-
-struct CloneCallFinder {
-    has_clone_call: bool,
-}
-
-impl VisitMut for CloneCallFinder {
-    fn visit_expr_method_call_mut(&mut self, node: &mut ExprMethodCall) {
-        // 检查方法名是否为 "clone"
-        eprintln!("node.method: {}", node.method);
-        // 打印现在的时间
-        println!("now: {}", chrono::Local::now());
-        // 时停1秒
-        std::thread::sleep(std::time::Duration::from_secs(1));
-        if node.method == "clone" {
-            self.has_clone_call = true;
-        }
-
-        // 继续访问子节点
-        syn::visit_mut::visit_expr_method_call_mut(self, node);
-    }
-}
-
-// 使用方法
-fn check_has_clone(expr: &syn::Expr) -> bool {
-    let mut finder = CloneCallFinder {
-        has_clone_call: false,
-    };
-    finder.visit_expr_mut(&mut expr.clone());
-
-    finder.has_clone_call
-}
-
-#[test]
-fn test_check_has_clone() {
-    let expr: syn::Expr = syn::parse_quote!(some_var.as_str().clone());
-    assert!(check_has_clone(&expr));
-    let expr: syn::Expr = syn::parse_quote!(some_var.other_method());
-    assert!(!check_has_clone(&expr));
 }

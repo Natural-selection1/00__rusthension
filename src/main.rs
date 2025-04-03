@@ -22,7 +22,7 @@ fn main() {
     {
         let result = rusthension![
             [x, y] if x > y else [y, x]
-            for x in 0..y+2 if x % 2 == 0
+            for x in (0..y+2) if x % 2 == 0
             for y in 0..7 if y % 3 == 0
         ];
         assert_eq!(
@@ -39,5 +39,18 @@ fn main() {
             ]
         );
         println!("测试返回元组_2迭代器_有条件");
+    }
+    {
+        let vec_1 = vec![("a", 1), ("b", 2), ("c", 3)];
+        let vec_2 = vec![("a", 1), ("b", 2), ("c", 3)];
+        let result = rusthension![
+            y if x > y else y
+            for x in vec_1
+            for y in &vec_2
+        ];
+
+        println!("{:?}", vec_1);
+        println!("{:?}", vec_2);
+        println!("{:?}", result);
     }
 }
