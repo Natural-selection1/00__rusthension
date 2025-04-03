@@ -1,20 +1,18 @@
 #![allow(unused)]
 
+use crate::iter_clause::BareIfClause;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse::ParseStream;
 
 #[proc_macro]
 pub fn rusthension(token_stream: TokenStream) -> TokenStream {
-    // 解析输入的token流为Comprehension结构
     let comprehension = syn::parse_macro_input!(token_stream as Comprehension);
 
-    // 将解析后的结构转换为token流
     let tokens = quote::quote! {
         #comprehension
     };
 
-    // 将quote生成的token流转换为proc_macro的TokenStream
     tokens.into()
 }
 
@@ -46,10 +44,11 @@ impl quote::ToTokens for Comprehension {
             }
         };
 
-        // 得到一份iter_clauses的副本
+        // 克隆并反序iter_clauses (不知道是不是能直接取反序引用的列表?)
         let mut iter_clauses = self.iter_clauses.clone();
+        iter_clauses.reverse();
 
-        // 从后向前遍历iter_clauses
+        // 遍历已经反序的iter_clauses
         while let Some(iter_clause) = iter_clauses.pop() {
             // 一些检查
             let is_range = is_range(&iter_clause.for_in_clause.iterable);
@@ -65,10 +64,9 @@ impl quote::ToTokens for Comprehension {
             };
 
             // 根据是否有if条件生成循环代码
+            let pat = &iter_clause.for_in_clause.pat;
             let current_loop = match &iter_clause.if_clause {
-                Some(if_clause) => {
-                    let pat = &iter_clause.for_in_clause.pat;
-                    let expr = &if_clause.expr;
+                Some(BareIfClause { expr }) => {
                     quote! {
                         for #pat in #iterable_code {
                             if #expr {
@@ -78,7 +76,6 @@ impl quote::ToTokens for Comprehension {
                     }
                 }
                 None => {
-                    let pat = &iter_clause.for_in_clause.pat;
                     quote! {
                         for #pat in #iterable_code {
                             #nested_code
@@ -107,7 +104,6 @@ impl syn::parse::Parse for Comprehension {
         let mut iter_clauses = Vec::new();
 
         let mapping = input.parse::<Mapping>()?;
-
         while let Ok(iter_clause) = input.parse::<IterClause>() {
             iter_clauses.push(iter_clause);
         }

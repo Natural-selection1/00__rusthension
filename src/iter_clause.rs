@@ -52,14 +52,13 @@ pub struct BareIfClause {
 impl syn::parse::Parse for BareIfClause {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<Token![if]>()?;
-        let expr = input.parse::<syn::Expr>()?;
-        Ok(Self { expr })
+        Ok(Self {
+            expr: input.parse::<syn::Expr>()?,
+        })
     }
 }
 
 /* ------------------------------------ */
-
-
 
 #[cfg(test)]
 mod tests {

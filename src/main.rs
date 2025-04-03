@@ -22,8 +22,22 @@ fn main() {
     {
         let result = rusthension![
             [x, y] if x > y else [y, x]
-            for x in 0..10 if x % 2 == 0
-            for y in 0..x if y % 3 == 0
+            for x in 0..y+2 if x % 2 == 0
+            for y in 0..7 if y % 3 == 0
         ];
+        assert_eq!(
+            result,
+            [
+                [0, 0],
+                [3, 0],
+                [3, 2],
+                [4, 3],
+                [6, 0],
+                [6, 2],
+                [6, 4],
+                [6, 6]
+            ]
+        );
+        println!("测试返回元组_2迭代器_有条件");
     }
 }

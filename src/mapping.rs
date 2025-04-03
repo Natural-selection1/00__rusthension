@@ -17,7 +17,6 @@ impl syn::parse::Parse for Mapping {
             right_expr: None,
         };
 
-        // 处理可能存在的 right_expr
         if input.peek(syn::Token![if]) {
             mapping.right_expr = Some(input.parse::<MappingElse>()?)
         }
@@ -36,7 +35,6 @@ pub struct MappingElse {
 impl syn::parse::Parse for MappingElse {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<Token![if]>()?;
-        // let conditions = input.call(syn::Expr::parse_without_eager_brace)?;
         let conditions = input.parse()?;
         input.parse::<Token![else]>()?;
 
