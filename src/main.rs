@@ -1,7 +1,7 @@
 #![allow(unused)]
 use rusthension::{
     b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, lazy_ref_iterator,
-    linked_list, vec_deque,
+    linked_list, vec_deque, vector,
 };
 use std::collections::{
     BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque,
@@ -22,7 +22,7 @@ fn main() {
 
 fn test_vec() {
     {
-        let result = rusthension::vec![
+        let result = vector![
             [x, y] if x > y else [y, x]
             for x in (0..y+2) if x % 2 == 0
             for y in 0..7 if y % 3 == 0
@@ -46,7 +46,7 @@ fn test_vec() {
         let vec_comprehension1 = vec![("a", 1), ("b", 2), ("c", 3)];
         let vec_comprehension2 = vec![("a", 1), ("b", 2), ("c", 3)];
         let vec_comprehension3 = vec![("a", 1), ("b", 2), ("c", 3)];
-        let _result = rusthension::vec![
+        let _result = vector![
             y if x > *z else y
             for x in vec_comprehension1.clone()
             for y in vec_comprehension2
@@ -121,7 +121,7 @@ fn test_自建类型() {
 
     let vec_y = vec![2, 4, 6];
     let vec_x = vec![1, 3, 5];
-    let _result = rusthension::vec![
+    let _result = vector![
         MyType { x, y }
         for x in vec_x if y == x + 1
         for y in vec_y
@@ -142,7 +142,6 @@ fn test_lazy_ref_iterator() {
         lazy_ref_iterator![x.clone() for x in vec_1 if x.contains("1") for y in vec_2 if y.contains("4")];
 
     for x in result3 {
-
         println!("{:#?}", x);
     }
     println!("--------------------------------");

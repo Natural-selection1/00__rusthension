@@ -13,10 +13,17 @@ pub struct VecDequeComprehension {
 
 impl quote::ToTokens for VecDequeComprehension {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        // 创建Mapping
-        let left_key = &self.mapping.left_key;
+        let VecDequeComprehension {
+            mapping:
+                Mapping {
+                    left_key,
+                    right_expr,
+                    ..
+                },
+            iter_clauses,
+        } = self;
 
-        let mut nested_code = match &self.mapping.right_expr {
+        let mut nested_code = match right_expr {
             None => quote! {
                 __rusthension_vec_deque.push_back(#left_key);
             },
@@ -39,11 +46,15 @@ impl quote::ToTokens for VecDequeComprehension {
 
         // 得到借用并反序的iter_clauses
         let mut iter_clauses: Vec<&IterClause> =
-            self.iter_clauses.iter().rev().collect();
+            iter_clauses.iter().rev().collect();
 
         // 遍历已经反序的iter_clauses
         while let Some(iter_clause) = iter_clauses.pop() {
-            let iterable = &iter_clause.for_in_clause.iterable;
+            let IterClause {
+                for_in_clause: ForInClause { pat, iterable },
+                if_clause,
+                ..
+            } = iter_clause;
 
             let iterable_code = if iter_clauses.is_empty()
                 || matches!(iterable, Expr::MethodCall(node) if node.method == "clone")
@@ -66,23 +77,24 @@ impl quote::ToTokens for VecDequeComprehension {
             };
 
             // 根据是否有if条件生成循环代码
-            let ForInClause { pat, .. } = &iter_clause.for_in_clause;
-            let current_loop =
-                if let Some(BareIfClause { expr }) = &iter_clause.if_clause {
+            let current_loop = match if_clause {
+                Some(BareIfClause { expr }) => {
                     quote! {
-                        for #pat in #iterable_code {
-                            if #expr {
+                    for #pat in #iterable_code {
+                        if #expr {
                                 #nested_code
                             }
                         }
                     }
-                } else {
+                }
+                None => {
                     quote! {
                         for #pat in #iterable_code {
                             #nested_code
                         }
                     }
-                };
+                }
+            };
 
             nested_code = current_loop;
         }

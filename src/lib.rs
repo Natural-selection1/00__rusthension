@@ -13,7 +13,7 @@ pub(crate) use eager_evaluation::{
 pub(crate) use lazy_evaluation::LazyRefIterator;
 
 #[proc_macro]
-pub fn vec(token_stream: TS) -> TS {
+pub fn vector(token_stream: TS) -> TS {
     process_comprehension::<VecComprehension>(token_stream)
 }
 #[proc_macro]

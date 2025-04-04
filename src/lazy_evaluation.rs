@@ -14,10 +14,18 @@ pub struct LazyRefIterator {
 
 impl quote::ToTokens for LazyRefIterator {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        // 创建Mapping
-        let left_key = &self.mapping.left_key;
+        // 解构以获得变量
+        let LazyRefIterator {
+            mapping:
+                Mapping {
+                    left_key,
+                    right_expr,
+                    ..
+                },
+            iter_clauses,
+        } = self;
 
-        let mut nested_code = match &self.mapping.right_expr {
+        let mut nested_code = match right_expr {
             None => quote! {
                 #left_key
             },
@@ -40,7 +48,7 @@ impl quote::ToTokens for LazyRefIterator {
         let mut is_deepest = true;
         // 得到借用并反序的iter_clauses
         let mut iter_clauses: Vec<&IterClause> =
-            self.iter_clauses.iter().rev().collect();
+            iter_clauses.iter().rev().collect();
 
         // 遍历已经反序的iter_clauses
         while let Some(iter_clause) = iter_clauses.pop() {
@@ -48,7 +56,7 @@ impl quote::ToTokens for LazyRefIterator {
                 for_in_clause: ForInClause { pat, iterable },
                 if_clause,
                 ..
-            } = &iter_clause;
+            } = iter_clause;
 
             //
             let current_loop =
