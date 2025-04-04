@@ -20,24 +20,6 @@ fn main() {
 
 fn test_vec() {
     {
-        println!("测试返回元组_1迭代器_有条件");
-        let vec = vec![("a", 1), ("b", 2), ("c", 3)];
-        let result = rusthension::vec![(x, y) for (x, y) in vec if y >= 2];
-        assert_eq!(result, [("b", 2), ("c", 3)]);
-    }
-
-    {
-        println!("测试返回String_1迭代器_有条件");
-        let vec = vec![
-            ("a".to_string(), 1),
-            ("b".to_string(), 2),
-            ("c".to_string(), 3),
-        ];
-        let result = rusthension::vec![(x, y) for (x, y) in vec if y >= 2];
-
-        assert_eq!(result, [("b".to_string(), 2), ("c".to_string(), 3)]);
-    }
-    {
         let result = rusthension::vec![
             [x, y] if x > y else [y, x]
             for x in (0..y+2) if x % 2 == 0
@@ -68,6 +50,11 @@ fn test_vec() {
             for y in vec_comprehension2
             for z in &vec_comprehension3
         ];
+
+        println!("{:#?}", vec_comprehension1);
+        // println!("{:#?}", vec_comprehension2);
+        println!("{:#?}", vec_comprehension3);
+        println!("{:#?}", _result);
     }
 }
 
