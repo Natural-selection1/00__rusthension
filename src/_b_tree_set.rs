@@ -15,20 +15,26 @@ pub struct BTreeSetComprehension {
 impl quote::ToTokens for BTreeSetComprehension {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         // 创建Mapping
-        let left_expr = &self.mapping.left_expr;
-        let mut nested_code = match &self.mapping.right_expr {
+        let Mapping {
+            left_key,
+            right_expr,
+            ..
+        } = &self.mapping;
+
+        let mut nested_code = match right_expr {
             None => quote! {
-                __rusthension_b_tree_set.insert(#left_expr);
+                __rusthension_b_tree_set.insert(#left_key);
             },
             Some(MappingElse {
                 conditions,
-                else_expr,
+                else_key,
+                ..
             }) => {
                 quote! {
                     if #conditions {
-                        __rusthension_b_tree_set.insert(#left_expr);
+                        __rusthension_b_tree_set.insert(#left_key);
                     } else {
-                        __rusthension_b_tree_set.insert(#else_expr);
+                        __rusthension_b_tree_set.insert(#else_key);
                     }
                 }
             }
@@ -135,7 +141,7 @@ mod tests {
         let comprehension: BTreeSetComprehension = parse_quote! {
             x * 2 for x in vec![1, 2, 3]
         };
-        assert!(matches!(comprehension.mapping.left_expr, Expr::Binary(_)));
+        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
         assert!(comprehension.mapping.right_expr.is_none());
         assert_eq!(comprehension.iter_clauses.len(), 1);
         assert!(matches!(
@@ -153,7 +159,7 @@ mod tests {
         let comprehension: BTreeSetComprehension = parse_quote! {
             x * 2 for x in 1..10 if x > 0
         };
-        assert!(matches!(comprehension.mapping.left_expr, Expr::Binary(_)));
+        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
         assert!(comprehension.mapping.right_expr.is_none());
         assert_eq!(comprehension.iter_clauses.len(), 1);
         assert!(matches!(
@@ -174,11 +180,11 @@ mod tests {
         let comprehension: BTreeSetComprehension = parse_quote! {
             x * 2 if x > 0 || x < 10 && x % 2 == 0 else 0 for x in items
         };
-        assert!(matches!(comprehension.mapping.left_expr, Expr::Binary(_)));
+        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
         assert!(comprehension.mapping.right_expr.is_some());
         if let Some(mapping_else) = &comprehension.mapping.right_expr {
             assert!(matches!(mapping_else.conditions, Expr::Binary(_)));
-            assert!(matches!(mapping_else.else_expr, Expr::Lit(_)));
+            assert!(matches!(mapping_else.else_key, Expr::Lit(_)));
         }
         assert_eq!(comprehension.iter_clauses.len(), 1);
         eprintln!("Comprehension带条件表达式的列表推导式测试通过");
@@ -187,7 +193,7 @@ mod tests {
         let comprehension: BTreeSetComprehension = parse_quote! {
             x + y for x in outer for y in inner
         };
-        assert!(matches!(comprehension.mapping.left_expr, Expr::Binary(_)));
+        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
         assert!(comprehension.mapping.right_expr.is_none());
         assert_eq!(comprehension.iter_clauses.len(), 2);
         assert!(matches!(
@@ -214,11 +220,11 @@ mod tests {
             for x in (0..10) if x % 2 == 0
             for y in (0..x) if y % 3 == 0
         };
-        assert!(matches!(comprehension.mapping.left_expr, Expr::Array(_)));
+        assert!(matches!(comprehension.mapping.left_key, Expr::Array(_)));
         assert!(comprehension.mapping.right_expr.is_some());
         if let Some(mapping_else) = &comprehension.mapping.right_expr {
             assert!(matches!(mapping_else.conditions, Expr::Binary(_)));
-            assert!(matches!(mapping_else.else_expr, Expr::Tuple(_)));
+            assert!(matches!(mapping_else.else_key, Expr::Tuple(_)));
         }
 
         assert_eq!(comprehension.iter_clauses.len(), 2);
@@ -231,7 +237,7 @@ mod tests {
             x.method().call() for x in items.iter().filter(|i| i.is_valid())
         };
         assert!(matches!(
-            comprehension.mapping.left_expr,
+            comprehension.mapping.left_key,
             Expr::MethodCall(_)
         ));
         assert!(comprehension.mapping.right_expr.is_none());

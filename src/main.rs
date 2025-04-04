@@ -88,7 +88,17 @@ fn test_b_tree_set() {
 }
 
 fn test_b_tree_map() {
-    let vec = vec![("a", 1), ("b", 2), ("c", 3)];
-    let result = b_tree_map_comprehension![x,y for x in vec];
-    assert_eq!(result, BTreeMap::from([("a", 1), ("b", 2), ("c", 3)]));
+    let vec_key = vec![("a", 1), ("b", 2), ("c", 3)];
+    let vec_value = vec![("a", 1), ("b", 2), ("c", 3)];
+
+    let result =
+        b_tree_map_comprehension![x , y for x in vec_key for y in vec_value];
+    assert_eq!(
+        result,
+        BTreeMap::from([
+            (("a", 1), ("a", 1)),
+            (("b", 2), ("b", 2)),
+            (("c", 3), ("c", 3))
+        ])
+    );
 }
