@@ -104,6 +104,7 @@ impl quote::ToTokens for BTreeMapComprehension {
 
             quote! {
                 {
+                    use ::std::collections::BTreeMap;
                     let mut __rusthension_b_tree_map = BTreeMap::new();
                     #nested_code
                     __rusthension_b_tree_map

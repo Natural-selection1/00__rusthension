@@ -103,6 +103,7 @@ impl quote::ToTokens for BinaryHeapComprehension {
 
             quote! {
                 {
+                    use ::std::collections::BinaryHeap;
                     let mut __rusthension_binary_heap = BinaryHeap::new();
                     #nested_code
                     __rusthension_binary_heap

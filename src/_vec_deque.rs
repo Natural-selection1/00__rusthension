@@ -98,6 +98,7 @@ impl quote::ToTokens for VecDequeComprehension {
 
             quote! {
                 {
+                    use ::std::collections::VecDeque;
                     let mut __rusthension_vec_deque = VecDeque::new();
                     #nested_code
                     __rusthension_vec_deque

@@ -103,6 +103,7 @@ impl quote::ToTokens for HashSetComprehension {
 
             quote! {
                 {
+                    use ::std::collections::HashSet;
                     let mut __rusthension_hash_set = HashSet::new();
                     #nested_code
                     __rusthension_hash_set

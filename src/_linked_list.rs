@@ -103,6 +103,7 @@ impl quote::ToTokens for LinkedListComprehension {
 
             quote! {
                 {
+                    use ::std::collections::LinkedList;
                     let mut __rusthension_linked_list = LinkedList::new();
                     #nested_code
                     __rusthension_linked_list

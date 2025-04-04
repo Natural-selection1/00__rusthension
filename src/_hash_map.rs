@@ -104,6 +104,7 @@ impl quote::ToTokens for HashMapComprehension {
 
             quote! {
                 {
+                    use ::std::collections::HashMap;
                     let mut __rusthension_hash_map = HashMap::new();
                     #nested_code
                     __rusthension_hash_map

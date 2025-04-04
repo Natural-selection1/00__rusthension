@@ -21,7 +21,7 @@ pub(crate) use _vec::VecComprehension;
 pub(crate) use _vec_deque::VecDequeComprehension;
 
 #[proc_macro]
-pub fn vec_(token_stream: TS) -> TS {
+pub fn vec(token_stream: TS) -> TS {
     process_comprehension::<VecComprehension>(token_stream)
 }
 

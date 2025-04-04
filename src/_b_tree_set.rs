@@ -103,6 +103,7 @@ impl quote::ToTokens for BTreeSetComprehension {
 
             quote! {
                 {
+                    use ::std::collections::BTreeSet;
                     let mut __rusthension_b_tree_set = BTreeSet::new();
                     #nested_code
                     __rusthension_b_tree_set

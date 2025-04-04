@@ -1,9 +1,9 @@
 use rusthension::{
-    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, linked_list, vec_,
+    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, linked_list,
     vec_deque,
 };
 use std::collections::{
-    BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque,
+    BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque,
 };
 
 fn main() {
@@ -15,13 +15,14 @@ fn main() {
     test_vec_deque();
     test_hash_set();
     test_hash_map();
+    test_自建类型();
 }
 
 fn test_vec() {
     {
         println!("测试返回元组_1迭代器_有条件");
         let vec = vec![("a", 1), ("b", 2), ("c", 3)];
-        let result = vec_![(x, y) for (x, y) in vec if y >= 2];
+        let result = rusthension::vec![(x, y) for (x, y) in vec if y >= 2];
         assert_eq!(result, [("b", 2), ("c", 3)]);
     }
 
@@ -32,12 +33,12 @@ fn test_vec() {
             ("b".to_string(), 2),
             ("c".to_string(), 3),
         ];
-        let result = vec_![(x, y) for (x, y) in vec if y >= 2];
+        let result = rusthension::vec![(x, y) for (x, y) in vec if y >= 2];
 
         assert_eq!(result, [("b".to_string(), 2), ("c".to_string(), 3)]);
     }
     {
-        let result = vec_![
+        let result = rusthension::vec![
             [x, y] if x > y else [y, x]
             for x in (0..y+2) if x % 2 == 0
             for y in 0..7 if y % 3 == 0
@@ -61,7 +62,7 @@ fn test_vec() {
         let vec_comprehension1 = vec![("a", 1), ("b", 2), ("c", 3)];
         let vec_comprehension2 = vec![("a", 1), ("b", 2), ("c", 3)];
         let vec_comprehension3 = vec![("a", 1), ("b", 2), ("c", 3)];
-        let _result = vec_![
+        let _result = rusthension::vec![
             y if x > *z else y
             for x in vec_comprehension1.clone()
             for y in vec_comprehension2
@@ -120,4 +121,21 @@ fn test_hash_map() {
         result,
         HashMap::from([("key_1", 3), ("key_2", 3), ("key_3", 3)])
     );
+}
+
+fn test_自建类型() {
+    #[derive(Debug, PartialEq, Eq)]
+    struct MyType {
+        x: i32,
+        y: i32,
+    }
+
+    let vec_y = vec![2, 4, 6];
+    let vec_x = vec![1, 3, 5];
+    let _result = rusthension::vec![
+        MyType { x, y }
+        for x in vec_x if y == x + 1
+        for y in vec_y
+    ];
+    println!("{:#?}", _result);
 }
