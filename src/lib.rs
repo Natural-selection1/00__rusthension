@@ -65,13 +65,11 @@ impl quote::ToTokens for Comprehension {
                             maybe change &iterable<T> to iterable<&T>"
                         );
                     }
-                    Expr::Range(_) => quote! { #iterable.clone() },
                     Expr::Path(_) => {
                         need_to_shadow.push(iterable);
-
                         quote! { #iterable.clone() }
                     }
-                    _ => quote! { #iterable.clone() },
+                    Expr::Range(_) | _ => quote! { #iterable.clone() },
                 }
             };
 
