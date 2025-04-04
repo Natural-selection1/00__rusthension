@@ -2,6 +2,7 @@ use proc_macro::TokenStream as TS;
 
 mod eager_evaluation;
 mod iter_clause;
+mod lazy_evaluation;
 mod mapping;
 
 pub(crate) use eager_evaluation::{
@@ -9,6 +10,8 @@ pub(crate) use eager_evaluation::{
     HashMapComprehension, HashSetComprehension, LinkedListComprehension,
     VecComprehension, VecDequeComprehension,
 };
+
+pub(crate) use lazy_evaluation::LazyRefIterator;
 
 #[proc_macro]
 pub fn vec(token_stream: TS) -> TS {
