@@ -10,7 +10,6 @@ pub(crate) use eager_evaluation::{
     HashMapComprehension, HashSetComprehension, LinkedListComprehension,
     VecComprehension, VecDequeComprehension,
 };
-
 pub(crate) use lazy_evaluation::LazyRefIterator;
 
 #[proc_macro]
@@ -44,6 +43,11 @@ pub fn hash_set(token_stream: TS) -> TS {
 #[proc_macro]
 pub fn hash_map(token_stream: TS) -> TS {
     process_comprehension::<HashMapComprehension>(token_stream)
+}
+
+#[proc_macro]
+pub fn lazy_ref_iterator(token_stream: TS) -> TS {
+    process_comprehension::<LazyRefIterator>(token_stream)
 }
 
 fn process_comprehension<T>(token_stream: TS) -> TS

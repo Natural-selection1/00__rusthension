@@ -1,6 +1,7 @@
+#![allow(unused)]
 use rusthension::{
-    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, linked_list,
-    vec_deque,
+    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, lazy_ref_iterator,
+    linked_list, vec_deque,
 };
 use std::collections::{
     BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque,
@@ -16,6 +17,7 @@ fn main() {
     test_hash_set();
     test_hash_map();
     test_自建类型();
+    // test_lazy_ref_iterator();
 }
 
 fn test_vec() {
@@ -126,3 +128,9 @@ fn test_自建类型() {
     ];
     println!("{:#?}", _result);
 }
+
+// fn test_lazy_ref_iterator() {
+//     let vec = vec![1, 2, 3];
+//     let result = lazy_ref_iterator![x for x in vec];
+//     assert_eq!(result, Vec::from([1, 2, 3]));
+// }
