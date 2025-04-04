@@ -17,7 +17,7 @@ fn main() {
     test_hash_set();
     test_hash_map();
     test_自建类型();
-    // test_lazy_ref_iterator();
+    test_lazy_ref_iterator();
 }
 
 fn test_vec() {
@@ -130,9 +130,27 @@ fn test_自建类型() {
 }
 
 fn test_lazy_ref_iterator() {
-    let vec = vec![1, 2, 3];
-    let result =
-        lazy_ref_iterator![x for x in vec if x % 2 == 1 for i in 1..=9];
+    let vec_1 = vec!["123".to_string(), "456".to_string(), "789".to_string()];
+    let vec_2 = vec!["123".to_string(), "456".to_string(), "789".to_string()];
 
-    assert_eq!(result, vec![&1, &3]);
+    let result =
+        lazy_ref_iterator![x for x in vec_1 if x.contains("1") for i in 1..=9]; // 范围最外层
+
+    let result2 = lazy_ref_iterator![x for i in 1..=9 for x in vec_1 if x.contains("123")]; // 范围最内层
+
+    let result3 =//双重迭代器
+        lazy_ref_iterator![x.clone() for x in vec_1 if x.contains("1") for y in vec_2 if y.contains("4")];
+
+    for x in result3 {
+
+        println!("{:#?}", x);
+    }
+    println!("--------------------------------");
+    for x in result2 {
+        println!("{:#?}", x);
+    }
+    println!("--------------------------------");
+    for x in result {
+        println!("{:#?}", x);
+    }
 }

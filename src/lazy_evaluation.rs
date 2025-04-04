@@ -53,7 +53,6 @@ impl quote::ToTokens for LazyRefIterator {
             //
             let current_loop =
                 match (iter_clauses.is_empty(), is_deepest, iterable) {
-                    // 最外层, 最内层, 是range
                     (true, true, Expr::Range(_)) => {
                         is_deepest = false;
                         quote! {
@@ -62,7 +61,7 @@ impl quote::ToTokens for LazyRefIterator {
                             }).collect::<Vec<_>>()
                         }
                     }
-                    // 最外层, 最内层, 是path
+
                     (true, true, Expr::Path(_)) => {
                         is_deepest = false;
                         // 需要克隆的iterable
@@ -88,13 +87,13 @@ impl quote::ToTokens for LazyRefIterator {
                         }
                         nested_code
                     }
-                    // 最外层, 不是最内层, 是range
+
                     (true, false, Expr::Range(_)) => quote! {
                         (#iterable).flat_map(move |#pat| {
                             #nested_code
                         }).collect::<Vec<_>>()
                     },
-                    // 最外层, 非最内层, 是path
+
                     (true, false, Expr::Path(_)) => {
                         // 需要克隆的iterable
                         need_to_clone_and_filter
@@ -109,15 +108,12 @@ impl quote::ToTokens for LazyRefIterator {
                             }).collect::<Vec<_>>()
                         }
                     }
-                    // 不是最外层, 是最内层, 是range
+
                     (false, true, Expr::Range(_)) => {
-                        // 需要克隆的iterable
                         is_deepest = false;
-                        need_to_clone_and_filter
-                            .push((iterable, if_clause, pat));
 
                         nested_code = quote! {
-                            (#iterable).map(move |#pat| {
+                            (#iterable).into_iter().map(move |#pat| {
                                 #nested_code
                             }).collect::<Vec<_>>()
                         };
@@ -131,10 +127,9 @@ impl quote::ToTokens for LazyRefIterator {
                         }
                         nested_code
                     }
-                    // 非最外层, 最内层, 是path
+
                     (false, true, Expr::Path(_)) => {
                         is_deepest = false;
-                        // 需要克隆的iterable
                         need_to_clone_and_filter
                             .push((iterable, if_clause, pat));
 
@@ -153,7 +148,7 @@ impl quote::ToTokens for LazyRefIterator {
                         }
                         nested_code
                     }
-                    //
+
                     (false, false, Expr::Range(_)) => {
                         nested_code = quote! {
                             (#iterable).flat_map(move |#pat| {
@@ -169,9 +164,8 @@ impl quote::ToTokens for LazyRefIterator {
                         }
                         nested_code
                     }
-                    //
+
                     (false, false, Expr::Path(_)) => {
-                        // 需要克隆的iterable
                         need_to_clone_and_filter
                             .push((iterable, if_clause, pat));
 
@@ -219,6 +213,7 @@ impl quote::ToTokens for LazyRefIterator {
                     },
                 }
             }
+
             quote! {
                 { #nested_code }
             }
