@@ -129,8 +129,9 @@ fn test_自建类型() {
     println!("{:#?}", _result);
 }
 
-// fn test_lazy_ref_iterator() {
-//     let vec = vec![1, 2, 3];
-//     let result = lazy_ref_iterator![x for x in vec];
-//     assert_eq!(result, Vec::from([1, 2, 3]));
-// }
+fn test_lazy_ref_iterator() {
+    let vec = vec![1, 2, 3];
+    let result = lazy_ref_iterator![x for x in vec if x % 2 == 1];
+
+    assert_eq!(result, vec![&1, &3]);
+}

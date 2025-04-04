@@ -64,7 +64,7 @@ impl quote::ToTokens for LazyRefIterator {
                 //
                 (true, true, Expr::Path(_)) => {
                     // 需要克隆的iterable
-                    need_to_clone_and_filter.push((iterable, if_clause));
+                    need_to_clone_and_filter.push((iterable, if_clause, pat));
 
                     //处理嵌套
                     nested_code = quote! {
@@ -77,7 +77,7 @@ impl quote::ToTokens for LazyRefIterator {
                     };
 
                     // 处理需要克隆的iterable
-                    for (iterable, _) in &need_to_clone_and_filter {
+                    for (iterable, ..) in &need_to_clone_and_filter {
                         nested_code = quote! {
                             let #iterable = #iterable.clone();
                             #nested_code
@@ -94,7 +94,7 @@ impl quote::ToTokens for LazyRefIterator {
                 //
                 (true, false, Expr::Path(_)) => {
                     // 需要克隆的iterable
-                    need_to_clone_and_filter.push((iterable, if_clause));
+                    need_to_clone_and_filter.push((iterable, if_clause, pat));
 
                     quote! {
                         (#iterable)
@@ -108,7 +108,7 @@ impl quote::ToTokens for LazyRefIterator {
                 //
                 (false, true, Expr::Range(_)) => {
                     // 需要克隆的iterable
-                    need_to_clone_and_filter.push((iterable, if_clause));
+                    need_to_clone_and_filter.push((iterable, if_clause, pat));
 
                     nested_code = quote! {
                         (#iterable).flat_map(move |#pat| {
@@ -117,7 +117,7 @@ impl quote::ToTokens for LazyRefIterator {
                     };
 
                     // 处理需要克隆的iterable
-                    for (iterable, _) in &need_to_clone_and_filter {
+                    for (iterable, ..) in &need_to_clone_and_filter {
                         nested_code = quote! {
                             let #iterable = #iterable.clone();
                             #nested_code
@@ -128,7 +128,7 @@ impl quote::ToTokens for LazyRefIterator {
                 //
                 (false, true, Expr::Path(_)) => {
                     // 需要克隆的iterable
-                    need_to_clone_and_filter.push((iterable, if_clause));
+                    need_to_clone_and_filter.push((iterable, if_clause, pat));
 
                     nested_code = quote! {
                         (#iterable).into_iter().flat_map(move |#pat| {
@@ -137,7 +137,7 @@ impl quote::ToTokens for LazyRefIterator {
                     };
 
                     // 处理需要克隆的iterable
-                    for (iterable, _) in &need_to_clone_and_filter {
+                    for (iterable, ..) in &need_to_clone_and_filter {
                         nested_code = quote! {
                             let #iterable = #iterable.clone();
                             #nested_code
@@ -153,7 +153,7 @@ impl quote::ToTokens for LazyRefIterator {
                         }).collect::<Vec<_>>()
                     };
 
-                    for (iterable, _) in &need_to_clone_and_filter {
+                    for (iterable, ..) in &need_to_clone_and_filter {
                         nested_code = quote! {
                             let #iterable = #iterable.clone();
                             #nested_code
@@ -164,7 +164,7 @@ impl quote::ToTokens for LazyRefIterator {
                 //
                 (false, false, Expr::Path(_)) => {
                     // 需要克隆的iterable
-                    need_to_clone_and_filter.push((iterable, if_clause));
+                    need_to_clone_and_filter.push((iterable, if_clause, pat));
 
                     nested_code = quote! {
                         let #iterable = #iterable.clone();
@@ -176,7 +176,7 @@ impl quote::ToTokens for LazyRefIterator {
                     };
 
                     // 处理需要克隆的iterable
-                    for (iterable, _) in &need_to_clone_and_filter {
+                    for (iterable, ..) in &need_to_clone_and_filter {
                         nested_code = quote! {
                             let #iterable = #iterable.clone();
                             #nested_code
@@ -195,14 +195,14 @@ impl quote::ToTokens for LazyRefIterator {
             while let Some(shadowed) = need_to_clone_and_filter.pop() {
                 //
                 nested_code = match shadowed {
-                    (iterable, Some(BareIfClause { expr })) => quote! {
+                    (iterable, Some(BareIfClause { expr }), pat) => quote! {
                         let #iterable = #iterable
                         .iter()
-                        .filter(|i| #expr)
+                        .filter(|&#pat| #expr)
                         .collect::<Vec<_>>();
                         #nested_code
                     },
-                    (iterable, None) => quote! {
+                    (iterable, None, _) => quote! {
                         let #iterable = #iterable
                         .iter()
                         .collect::<Vec<_>>();
@@ -210,8 +210,9 @@ impl quote::ToTokens for LazyRefIterator {
                     },
                 }
             }
-
-            nested_code
+            quote! {
+                { #nested_code }
+            }
         };
 
         tokens.extend(output_code);
