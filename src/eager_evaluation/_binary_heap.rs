@@ -24,7 +24,7 @@ impl quote::ToTokens for BinaryHeapComprehension {
             iter_clauses,
         } = self;
 
-        let mut nested_code = match right_expr {
+        let nested_code = match right_expr {
             None => quote! {
                 __rusthension_binary_heap.push(#left_key);
             },
@@ -43,61 +43,11 @@ impl quote::ToTokens for BinaryHeapComprehension {
             }
         };
 
-        let mut need_to_shadow: Vec<&Expr> = vec![];
-
-        // 得到借用并反序的iter_clauses
-        let mut iter_clauses: Vec<&IterClause> =
-            iter_clauses.iter().rev().collect();
-
-        // 遍历已经反序的iter_clauses
-        while let Some(iter_clause) = iter_clauses.pop() {
-            let IterClause {
-                for_in_clause: ForInClause { pat, iterable },
-                if_clause,
-            } = iter_clause;
-
-            let iterable_code = if iter_clauses.is_empty()
-                || matches!(iterable, Expr::MethodCall(node) if node.method == "clone")
-            {
-                quote! { #iterable }
-            } else {
-                match iterable {
-                    Expr::Reference(_) => {
-                        panic!(
-                            "can't use reference in inner loop, \
-                            maybe change &iterable<T> to iterable<&T>"
-                        );
-                    }
-                    Expr::Path(_) => {
-                        need_to_shadow.push(iterable);
-                        quote! { #iterable.clone() }
-                    }
-                    Expr::Range(_) | _ => quote! { #iterable.clone() },
-                }
-            };
-
-            // 根据是否有if条件生成循环代码
-            let current_loop = match if_clause {
-                Some(BareIfClause { expr }) => {
-                    quote! {
-                        for #pat in #iterable_code {
-                            if #expr {
-                                #nested_code
-                            }
-                        }
-                    }
-                }
-                None => {
-                    quote! {
-                        for #pat in #iterable_code {
-                            #nested_code
-                        }
-                    }
-                }
-            };
-
-            nested_code = current_loop;
-        }
+        let (mut need_to_shadow, mut nested_code) =
+            crate::eager_evaluation::handle_nested_loops(
+                iter_clauses,
+                nested_code,
+            );
 
         let output_code = {
             // 为需要影子变量的变量添加声明
