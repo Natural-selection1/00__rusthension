@@ -28,11 +28,9 @@ pub(crate) fn handle_nested_loops<'a>(
 ) -> (Vec<&'a Expr>, TokenStream) {
     let mut need_to_shadow: Vec<&'a Expr> = vec![];
 
-    // 得到借用并反序的iter_clauses
-    let mut iter_clauses: Vec<&'a IterClause> =
-        iter_clauses.iter().rev().collect();
-
-    // 遍历已经反序的iter_clauses
+    // 遍历iter_clauses(因为越向后层次越深, 所以直接pop就行了)
+    let mut iter_clauses: Vec<&'a IterClause> = iter_clauses.iter().collect();
+    
     while let Some(iter_clause) = iter_clauses.pop() {
         let IterClause {
             for_in_clause: ForInClause { pat, iterable },

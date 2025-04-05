@@ -24,8 +24,8 @@ fn test_vec() {
     {
         let result = vector![
             [x, y] if x > y else [y, x]
-            for x in (0..y+2) if x % 2 == 0
             for y in 0..7 if y % 3 == 0
+            for x in (0..y+2) if x % 2 == 0
         ];
         assert_eq!(
             result,
@@ -48,9 +48,9 @@ fn test_vec() {
         let vec_comprehension3 = vec![("a", 1), ("b", 2), ("c", 3)];
         let _result = vector![
             y if x > *z else y
+            for z in &vec_comprehension3
             for x in vec_comprehension1.clone()
             for y in vec_comprehension2
-            for z in &vec_comprehension3
         ];
 
         println!("{:#?}", vec_comprehension1);
@@ -123,8 +123,8 @@ fn test_自建类型() {
     let vec_x = vec![1, 3, 5];
     let _result = vector![
         MyType { x, y }
-        for x in vec_x if y == x + 1
         for y in vec_y
+        for x in vec_x if y == x + 1
     ];
     println!("{:#?}", _result);
 }
@@ -140,7 +140,7 @@ fn test_lazy_ref_iterator() {
 
     let result3 =//双重迭代器
         lazy_ref_iterator![(x, y)
-        for x in vec_1 if x.contains("1") || x.contains("7") 
+        for x in vec_1 if x.contains("1") || x.contains("7")
         for y in vec_2 if y.contains("A") || y.contains("D")];
 
     println!("{:#?}", result2);
