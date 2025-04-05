@@ -66,7 +66,7 @@ impl quote::ToTokens for LazyRefIterator {
                         quote! {
                             (#iterable).map(move |#pat| {
                                 #nested_code
-                            }).collect::<Vec<_>>()
+                            })
                         }
                     }
 
@@ -83,7 +83,7 @@ impl quote::ToTokens for LazyRefIterator {
                             .into_iter()
                             .map(move |#pat| {
                                 #nested_code
-                            }).collect::<Vec<_>>()
+                            })
                         };
 
                         // 处理需要克隆的iterable
@@ -99,7 +99,7 @@ impl quote::ToTokens for LazyRefIterator {
                     (true, false, Expr::Range(_)) => quote! {
                         (#iterable).flat_map(move |#pat| {
                             #nested_code
-                        }).collect::<Vec<_>>()
+                        })
                     },
 
                     (true, false, Expr::Path(_)) => {
@@ -113,7 +113,7 @@ impl quote::ToTokens for LazyRefIterator {
                         .into_iter()
                         .flat_map(move |#pat| {
                             #nested_code
-                            }).collect::<Vec<_>>()
+                            })
                         }
                     }
 
