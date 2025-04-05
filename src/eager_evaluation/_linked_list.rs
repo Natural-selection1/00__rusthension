@@ -54,7 +54,6 @@ impl quote::ToTokens for LinkedListComprehension {
             let IterClause {
                 for_in_clause: ForInClause { pat, iterable },
                 if_clause,
-                ..
             } = iter_clause;
 
             let iterable_code = if iter_clauses.is_empty()
