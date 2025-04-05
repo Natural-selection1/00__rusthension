@@ -43,20 +43,12 @@ impl quote::ToTokens for VecComprehension {
             }
         };
 
-        let (mut need_to_shadow, mut nested_code) =
-            crate::eager_evaluation::handle_nested_loops(
-                iter_clauses,
-                nested_code,
-            );
+        let nested_code = crate::eager_evaluation::handle_nested_loops(
+            iter_clauses,
+            nested_code,
+        );
 
         let output_code = {
-            // 为需要影子变量的变量添加声明
-            while let Some(shadowed) = need_to_shadow.pop() {
-                nested_code = quote! {
-                    let #shadowed = #shadowed;
-                    #nested_code
-                };
-            }
 
             quote! {
                 {

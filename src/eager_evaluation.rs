@@ -25,12 +25,12 @@ use syn::Expr;
 pub(crate) fn handle_nested_loops<'a>(
     iter_clauses: &'a [IterClause],
     mut nested_code: TokenStream,
-) -> (Vec<&'a Expr>, TokenStream) {
+) -> TokenStream {
     let mut need_to_shadow: Vec<&'a Expr> = vec![];
 
     // 遍历iter_clauses(因为越向后层次越深, 所以直接pop就行了)
     let mut iter_clauses: Vec<&'a IterClause> = iter_clauses.iter().collect();
-    
+
     while let Some(iter_clause) = iter_clauses.pop() {
         let IterClause {
             for_in_clause: ForInClause { pat, iterable },
@@ -80,5 +80,13 @@ pub(crate) fn handle_nested_loops<'a>(
         nested_code = current_loop;
     }
 
-    (need_to_shadow, nested_code)
+    // 为需要影子变量的变量添加声明
+    while let Some(shadowed) = need_to_shadow.pop() {
+        nested_code = quote! {
+            let #shadowed = #shadowed;
+            #nested_code
+        };
+    }
+
+    nested_code
 }
