@@ -49,7 +49,6 @@ impl quote::ToTokens for HashMapComprehension {
         );
 
         let output_code = {
-
             quote! {
                 {
                     use ::std::collections::HashMap;

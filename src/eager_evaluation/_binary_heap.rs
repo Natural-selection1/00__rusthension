@@ -49,8 +49,6 @@ impl quote::ToTokens for BinaryHeapComprehension {
         );
 
         let output_code = {
-
-
             quote! {
                 {
                     use ::std::collections::BinaryHeap;

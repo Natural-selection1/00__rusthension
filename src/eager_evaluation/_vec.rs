@@ -49,7 +49,6 @@ impl quote::ToTokens for VecComprehension {
         );
 
         let output_code = {
-
             quote! {
                 {
                     let mut __rusthension_vec = Vec::new();

@@ -49,8 +49,6 @@ impl quote::ToTokens for BTreeMapComprehension {
         );
 
         let output_code = {
-
-
             quote! {
                 {
                     use ::std::collections::BTreeMap;
