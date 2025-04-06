@@ -1,4 +1,11 @@
-#![allow(unused)]
+#![allow(
+    unused,
+    clippy::filter_map_bool_then,
+    clippy::nonminimal_bool,
+    clippy::unnecessary_lazy_evaluations,
+    clippy::if_same_then_else,
+    clippy::useless_conversion
+)]
 use better_comprehension::{
     b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, iterator_ref, linked_list, vec_deque,
     vector,
@@ -128,20 +135,62 @@ fn test_自建类型() {
 }
 
 fn test_ref_iterator() {
-    let vec_1 = vec!["123".to_string(), "456".to_string(), "789".to_string()];
-    let vec_2 = vec!["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
+    let vec_1 = ["123".to_string(), "456".to_string(), "789".to_string()];
+    let vec_2 = ["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
 
-    let result = iterator_ref![x for x in vec_1 if x.contains("1") for i in 1..=9]; // 范围最外层
+    // let result = iterator_ref![x for x in vec_1 if x.contains("1") for i in 1..=9]; // 范围最外层
 
-    let result2 = iterator_ref![x for i in 1..=9 for x in vec_1 if x.contains("123")]; // 范围最内层
+    // let result2 = iterator_ref![x for i in 1..=9 for x in vec_1 if x.contains("123")]; // 范围最内层
 
-    let result3 =//双重迭代器
+    let result3 = {
+        let vec_2 = vec_2.iter().collect::<Vec<_>>();
+        let vec_1 = vec_1.iter().collect::<Vec<_>>();
 
+        (vec_1)
+            // .clone()
+            .into_iter()
+            .filter_map(move |x| {
+                (true && (x.contains("1") || x.contains("7")))
+                .then(|| {
+                    // 进入第二层
 
-    iterator_ref![(x, y)
-    for x in vec_1 if x.contains("1") || x.contains("7")
-    for i in 1..=9
-    for y in vec_2 if y.contains("A") || y.contains("D")];
+                    let vec_2 = vec_2.clone();
+                    (1..=9)
+                    .into_iter()
+                    .filter_map(move |i| {
+                        (true && (x.contains("1") && i >= 8))
+                        .then(|| {
+                            // 进入第三层
+
+                            let vec_2 = vec_2.clone();
+                            (vec_2)
+                            .into_iter()
+                            .filter_map(move |y| {
+                                (true && (y.contains("A") || y.contains("D")))
+                                .then(|| {
+                                    // 进入第四层
+
+                                    if 1 > 2 { (y) } else { (y) }
+
+                                    //
+                                })
+                            })
+
+                            // 离开最内层
+                        })
+                    })
+
+                    //第二层结束
+                })
+            })
+            .flatten()
+            .flatten() // 有 n 层就要 n-1 次 flatten()
+    };
+
+    // iterator_ref![(x, y)
+    // for x in vec_1 if x.contains("1") || x.contains("7")
+    // for i in 1..=9
+    // for y in vec_2 if y.contains("A") || y.contains("D")];
 
     // println!("{:#?}", result2);
     // for (x, y) in result3 {
