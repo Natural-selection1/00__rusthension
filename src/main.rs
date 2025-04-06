@@ -1,11 +1,9 @@
 #![allow(unused)]
 use rusthension::{
-    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, lazy_ref_iterator,
-    linked_list, vec_deque, vector,
+    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, lazy_ref_iterator, linked_list,
+    vec_deque, vector,
 };
-use std::collections::{
-    BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque,
-};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
 
 fn main() {
     test_vec();
@@ -133,8 +131,7 @@ fn test_lazy_ref_iterator() {
     let vec_1 = vec!["123".to_string(), "456".to_string(), "789".to_string()];
     let vec_2 = vec!["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
 
-    let result =
-        lazy_ref_iterator![x for x in vec_1 if x.contains("1") for i in 1..=9]; // 范围最外层
+    let result = lazy_ref_iterator![x for x in vec_1 if x.contains("1") for i in 1..=9]; // 范围最外层
 
     let result2 = lazy_ref_iterator![x for i in 1..=9 for x in vec_1 if x.contains("123")]; // 范围最内层
 

@@ -1,4 +1,3 @@
-#![allow(unused_imports)]
 pub mod _b_tree_map;
 pub mod _b_tree_set;
 pub mod _binary_heap;
@@ -18,6 +17,7 @@ pub use _vec::VecComprehension;
 pub use _vec_deque::VecDequeComprehension;
 
 use crate::iter_clause::{BareIfClause, ForInClause, IterClause};
+
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Expr;
@@ -44,10 +44,7 @@ pub(crate) fn handle_nested_loops<'a>(
         } else {
             match iterable {
                 Expr::Reference(_) => {
-                    panic!(
-                        "can't use reference in inner loop, \
-                        maybe change &iterable<T> to iterable<&T>"
-                    );
+                    panic!("can't use reference in inner loop");
                 }
                 Expr::Path(_) => {
                     need_to_shadow.push(iterable);

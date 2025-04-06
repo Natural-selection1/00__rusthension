@@ -1,9 +1,8 @@
-use quote::quote;
-use syn::Expr;
-use syn::parse::ParseStream;
-
-use crate::iter_clause::{BareIfClause, ForInClause, IterClause};
+use crate::iter_clause::IterClause;
 use crate::mapping::{Mapping, MappingElse};
+
+use quote::quote;
+use syn::parse::ParseStream;
 
 /*-----------------VecComprehension------------------- */
 #[derive(Debug)]
@@ -43,10 +42,7 @@ impl quote::ToTokens for VecComprehension {
             }
         };
 
-        let nested_code = crate::eager_evaluation::handle_nested_loops(
-            iter_clauses,
-            nested_code,
-        );
+        let nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
 
         let output_code = {
             quote! {
@@ -81,6 +77,7 @@ impl syn::parse::Parse for VecComprehension {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use syn::Expr;
     use syn::parse_quote;
 
     #[test]

@@ -6,9 +6,8 @@ mod lazy_evaluation;
 mod mapping;
 
 pub(crate) use eager_evaluation::{
-    BTreeMapComprehension, BTreeSetComprehension, BinaryHeapComprehension,
-    HashMapComprehension, HashSetComprehension, LinkedListComprehension,
-    VecComprehension, VecDequeComprehension,
+    BTreeMapComprehension, BTreeSetComprehension, BinaryHeapComprehension, HashMapComprehension,
+    HashSetComprehension, LinkedListComprehension, VecComprehension, VecDequeComprehension,
 };
 pub(crate) use lazy_evaluation::LazyRefIterator;
 
