@@ -12,6 +12,11 @@ pub struct LazyRefIterator {
     pub iter_clauses: Vec<IterClause>,
 }
 
+struct InfoContainer<'a> {
+    depth: usize,
+    paths: Vec<&'a Expr>,
+}
+
 impl quote::ToTokens for LazyRefIterator {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         // 解构以获得变量
@@ -44,181 +49,77 @@ impl quote::ToTokens for LazyRefIterator {
             }
         };
 
-        let mut need_to_clone_and_ref = vec![];
-        // let mut is_deepest = true;
-        // 得到借用的iter_clauses
-        let mut iter_clauses: Vec<&IterClause> = iter_clauses.iter().collect();
+        let mut info_container = InfoContainer {
+            depth: 0,
+            paths: vec![],
+        };
 
-        // 从尾部遍历iter_clauses
+        // 从尾部遍历iter_clauses(从最内层开始)
+        let mut iter_clauses: Vec<&IterClause> = iter_clauses.iter().collect();
         while let Some(iter_clause) = iter_clauses.pop() {
             let IterClause {
                 for_in_clause: ForInClause { pat, iterable },
                 if_clause,
                 ..
             } = iter_clause;
+            info_container.depth += 1;
 
-            //
-            let current_loop =
-            // 开始处理嵌套
-            match (iter_clauses.is_empty(), iterable, if_clause) {
-                // 最外层
-                (true, Expr::Range(iterable), Some(BareIfClause { expr })) => {
-                    quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { #expr })
-                        .then(|| {
-                            #nested_code
-                        })
+            nested_code = {
+                //
+                match iterable {
+                    Expr::Range(_) => {}
+                    Expr::Path(_) => {
+                        info_container.paths.push(iterable);
                     }
+                    _ => panic!("unreachable"),
                 }
-                // 最外层
-                (true, Expr::Range(iterable), None) => {
-                    quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { true })
-                        .then(|| {
+
+                let expr = match if_clause {
+                    Some(BareIfClause { expr }) => quote! { #expr },
+                    None => quote! { true },
+                };
+
+                nested_code = quote! {
+                    (#iterable)
+                    .into_iter()
+                    .filter_map(move |#pat| {
+                        ( #expr ).then(|| {
                             #nested_code
                         })
-                    }
-                }
-                (false, Expr::Range(iterable), Some(BareIfClause { expr })) => {
-                    nested_code = quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { #expr })
-                        .then(|| {
-                            #nested_code
-                        })
-                    };
-                    // 处理需要克隆的iterable
-                    for (_ , iterable, _) in &need_to_clone_and_ref {
-                        nested_code = quote! {
-                            let #iterable = #iterable.clone();
-                            #nested_code
+                    })
+                };
+
+                match iter_clauses.is_empty() {
+                    true => nested_code,
+                    false => {
+                        // 非最外层，需要处理克隆
+                        for iterable in &info_container.paths {
+                            nested_code = quote! {
+                                let #iterable = #iterable.clone();
+                                #nested_code
+                            }
                         }
-                    }
-
-                    nested_code
-                }
-                (false, Expr::Range(iterable), None) => {
-                    nested_code = quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { true })
-                        .then(|| {
-                            #nested_code
-                        })
-                    };
-                    // 处理需要克隆的iterable
-                    for (_ , iterable, _) in &need_to_clone_and_ref {
-                        nested_code = quote! {
-                            let #iterable = #iterable.clone();
-                            #nested_code
-                        }
-                    }
-
-                    nested_code
-                }
-
-                // 最外层
-                (true, Expr::Path(iterable), Some(BareIfClause { expr })) => {
-                    // 需要引用化的iterable
-                    need_to_clone_and_ref.push((pat, iterable, if_clause));
-
-                    //处理嵌套
-                    quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { #expr })
-                        .then(|| {
-                            #nested_code
-                        })
+                        nested_code
                     }
                 }
-                // 最外层
-                (true, Expr::Path(iterable), None) => {
-                    // 需要引用化的iterable
-                    need_to_clone_and_ref.push((pat, iterable, if_clause));
-
-                    //处理嵌套
-                    quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { true })
-                        .then(|| {
-                            #nested_code
-                        })
-                    }
-                }
-                (false, Expr::Path(iterable), Some(BareIfClause { expr })) => {
-                    // 需要引用化的iterable
-                    need_to_clone_and_ref.push((pat, iterable, if_clause));
-
-                    nested_code = quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { #expr })
-                        .then(|| {
-                            #nested_code
-                        })
-                    };
-                    // 处理需要克隆的iterable
-                    for (_,iterable,_) in &need_to_clone_and_ref {
-                        nested_code = quote! {
-                            let #iterable = #iterable.clone();
-                            #nested_code
-                        }
-                    }
-
-                    nested_code
-                }
-                (false, Expr::Path(iterable), None) => {
-                    // 需要引用化的iterable
-                    need_to_clone_and_ref.push((pat, iterable, if_clause));
-
-                    nested_code = quote! {
-                        (#iterable)
-                        .into_iter()
-                        .filter_map(move |#pat| { true })
-                        .then(|| {
-                            #nested_code
-                        })
-                    };
-                    // 处理需要克隆的iterable
-                    for (_,iterable,_) in &need_to_clone_and_ref {
-                        nested_code = quote! {
-                            let #iterable = #iterable.clone();
-                            #nested_code
-                        }
-                    }
-
-                    nested_code
-                }
-
-                _ => panic!("unreachable"),
             };
-
-            nested_code = current_loop;
         }
 
-        // 为需要影子变量的变量添加声明
-        while let Some(shadowed) = need_to_clone_and_ref.pop() {
-            let (_, iterable, _) = shadowed;
+        // 将fliter_map的Some展开
+        for _ in 0..(info_container.depth - 1) {
+            nested_code = quote! { #nested_code.flatten() }
+        }
+
+        // 为需要引用化的容器添加声明
+        while let Some(iterable) = info_container.paths.last().copied() {
+            info_container.paths.pop();
             nested_code = quote! {
                 let #iterable = #iterable.iter().collect::<Vec<_>>();
                 #nested_code
             }
         }
 
-        let output_code = {
-            quote! {
-                { #nested_code }
-            }
-        };
-
-        tokens.extend(output_code);
+        tokens.extend(quote! { { #nested_code } });
     }
 }
 
