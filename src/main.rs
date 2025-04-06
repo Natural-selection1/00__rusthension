@@ -1,7 +1,7 @@
 #![allow(unused)]
-use rusthension::{
-    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, lazy_ref_iterator, linked_list,
-    vec_deque, vector,
+use better_comprehension::{
+    b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, iterator_ref, linked_list, vec_deque,
+    vector,
 };
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
 
@@ -15,7 +15,7 @@ fn main() {
     test_hash_set();
     test_hash_map();
     test_自建类型();
-    test_lazy_ref_iterator();
+    test_ref_iterator();
 }
 
 fn test_vec() {
@@ -127,23 +127,26 @@ fn test_自建类型() {
     println!("{:#?}", _result);
 }
 
-fn test_lazy_ref_iterator() {
+fn test_ref_iterator() {
     let vec_1 = vec!["123".to_string(), "456".to_string(), "789".to_string()];
     let vec_2 = vec!["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
 
-    let result = lazy_ref_iterator![x for x in vec_1 if x.contains("1") for i in 1..=9]; // 范围最外层
+    let result = iterator_ref![x for x in vec_1 if x.contains("1") for i in 1..=9]; // 范围最外层
 
-    let result2 = lazy_ref_iterator![x for i in 1..=9 for x in vec_1 if x.contains("123")]; // 范围最内层
+    let result2 = iterator_ref![x for i in 1..=9 for x in vec_1 if x.contains("123")]; // 范围最内层
 
     let result3 =//双重迭代器
-        lazy_ref_iterator![(x, y)
-        for x in vec_1 if x.contains("1") || x.contains("7")
-        for y in vec_2 if y.contains("A") || y.contains("D")];
 
-    println!("{:#?}", result2);
-    for (x, y) in result3 {
-        println!("{:#?}", x);
-        println!("{:#?}", y);
-        println!("--------------------------------");
-    }
+
+    iterator_ref![(x, y)
+    for x in vec_1 if x.contains("1") || x.contains("7")
+    for i in 1..=9
+    for y in vec_2 if y.contains("A") || y.contains("D")];
+
+    // println!("{:#?}", result2);
+    // for (x, y) in result3 {
+    //     println!("{:#?}", x);
+    //     println!("{:#?}", y);
+    //     println!("--------------------------------");
+    // }
 }

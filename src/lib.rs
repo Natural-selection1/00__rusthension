@@ -45,7 +45,7 @@ pub fn hash_map(token_stream: TS) -> TS {
 }
 
 #[proc_macro]
-pub fn lazy_ref_iterator(token_stream: TS) -> TS {
+pub fn iterator_ref(token_stream: TS) -> TS {
     process_comprehension::<LazyRefIterator>(token_stream)
 }
 
