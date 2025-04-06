@@ -56,10 +56,10 @@ pub(crate) fn handle_nested_loops<'a>(
 
         // 根据是否有if条件生成循环代码
         let current_loop = match if_clause {
-            Some(BareIfClause { expr }) => {
+            Some(BareIfClause { conditions }) => {
                 quote! {
                     for #pat in #iterable_code {
-                        if #expr {
+                        if #conditions {
                             #nested_code
                         }
                     }

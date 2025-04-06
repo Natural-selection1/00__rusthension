@@ -47,14 +47,14 @@ impl syn::parse::Parse for ForInClause {
 /*-----------------BareIfClause------------------- */
 #[derive(Debug)]
 pub struct BareIfClause {
-    pub expr: Expr,
+    pub conditions: Expr,
 }
 
 impl syn::parse::Parse for BareIfClause {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<Token![if]>()?;
         Ok(Self {
-            expr: input.parse::<Expr>()?,
+            conditions: input.parse::<Expr>()?,
         })
     }
 }
@@ -85,7 +85,7 @@ mod tests {
         assert!(matches!(iter_clause.for_in_clause.iterable, Expr::Path(_)));
         assert!(iter_clause.if_clause.is_some());
         if let Some(if_clause) = &iter_clause.if_clause {
-            assert!(matches!(if_clause.expr, Expr::Binary(_)));
+            assert!(matches!(if_clause.conditions, Expr::Binary(_)));
         }
         eprintln!("IterClause带if条件的for-in子句测试通过");
 
@@ -109,7 +109,7 @@ mod tests {
         ));
         assert!(iter_clause.if_clause.is_some());
         if let Some(if_clause) = &iter_clause.if_clause {
-            assert!(matches!(if_clause.expr, Expr::Binary(_)));
+            assert!(matches!(if_clause.conditions, Expr::Binary(_)));
         }
         eprintln!("IterClause复杂表达式的for-in子句测试通过");
     }
@@ -147,21 +147,21 @@ mod tests {
         let if_clause: BareIfClause = parse_quote! {
             if x > 0
         };
-        assert!(matches!(if_clause.expr, Expr::Binary(_)));
+        assert!(matches!(if_clause.conditions, Expr::Binary(_)));
         eprintln!("BareIfClause基本条件表达式测试通过");
 
         // 测试复杂条件表达式解析
         let if_clause: BareIfClause = parse_quote! {
             if x > 0 && y < 10 || z == 5
         };
-        assert!(matches!(if_clause.expr, Expr::Binary(_)));
+        assert!(matches!(if_clause.conditions, Expr::Binary(_)));
         eprintln!("BareIfClause复杂条件表达式测试通过");
 
         // 测试函数调用条件表达式解析
         let if_clause: BareIfClause = parse_quote! {
             if is_valid(x) && x.len() > 0
         };
-        assert!(matches!(if_clause.expr, Expr::Binary(_)));
+        assert!(matches!(if_clause.conditions, Expr::Binary(_)));
         eprintln!("BareIfClause函数调用条件表达式测试通过");
     }
 }

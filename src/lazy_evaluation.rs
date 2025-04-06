@@ -74,8 +74,8 @@ impl quote::ToTokens for LazyRefIterator {
                     _ => panic!("unreachable"),
                 }
 
-                let expr = match if_clause {
-                    Some(BareIfClause { expr }) => quote! { #expr },
+                let conditions = match if_clause {
+                    Some(BareIfClause { conditions }) => quote! { #conditions },
                     None => quote! { true },
                 };
 
@@ -83,7 +83,7 @@ impl quote::ToTokens for LazyRefIterator {
                     (#iterable)
                     .into_iter()
                     .filter_map(move |#pat| {
-                        ( #expr ).then(|| {
+                        ( #conditions ).then(|| {
                             #nested_code
                         })
                     })

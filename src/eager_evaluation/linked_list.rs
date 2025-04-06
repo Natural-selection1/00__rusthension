@@ -118,7 +118,7 @@ mod tests {
         ));
         assert!(comprehension.iter_clauses[0].if_clause.is_some());
         if let Some(if_clause) = &comprehension.iter_clauses[0].if_clause {
-            assert!(matches!(if_clause.expr, syn::Expr::Binary(_)));
+            assert!(matches!(if_clause.conditions, syn::Expr::Binary(_)));
         }
         eprintln!("Comprehension带if条件的列表推导式测试通过");
 
