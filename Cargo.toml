@@ -7,8 +7,7 @@ keywords = [
     "macro",
     "procedural",
     "procedural-macro",
-    "collection-comprehension",
-    "iterator-comprehension",
+    "list-comprehension",
     "comprehension",
 ]
 repository = "https://github.com/Natural-selection1/better-comprehension-in-rust"
