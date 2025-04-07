@@ -37,21 +37,25 @@ pub(crate) fn handle_nested_loops<'a>(
             if_clause,
         } = iter_clause;
 
-        let iterable_code = if iter_clauses.is_empty()
-            || matches!(iterable, Expr::MethodCall(node) if node.method == "clone")
-        {
-            quote! { #iterable }
-        } else {
-            match iterable {
-                Expr::Reference(_) => {
-                    panic!("can't use reference in inner loop");
-                }
-                Expr::Path(_) => {
-                    need_to_shadow.push(iterable);
-                    quote! { #iterable.clone() }
-                }
-                Expr::Range(_) | _ => quote! { #iterable.clone() },
+        let iterable_code = match iterable {
+            Expr::Reference(_) | Expr::Range(_) => quote! { #iterable },
+            Expr::Path(_) => {
+                need_to_shadow.push(iterable);
+                quote! { &#iterable }
             }
+            Expr::MethodCall(method_call) => {
+                let method_name = &method_call.method;
+                if method_name == "iter" {
+                    quote! { #iterable }
+                } else {
+                    panic!("不支持的类型: {:?}", iterable);
+                }
+            }
+            Expr::Paren(expr) => {
+                let iterable = &*expr.expr;
+                quote! { #iterable }
+            }
+            _ => panic!("不支持的类型: {:?}", iterable),
         };
 
         // 根据是否有if条件生成循环代码
@@ -172,8 +176,8 @@ mod tests {
         eprintln!("Comprehension多层嵌套的列表推导式测试通过");
 
         // 测试复杂的多层嵌套带条件的列表推导式解析
-        let comprehension: VecComprehension = parse_quote! { [x, y]
-            if x > y else (y, x)
+        let comprehension: VecComprehension = parse_quote! {
+            [x, y] if x > y else (y, x)
             for x in (0..10) if x % 2 == 0
             for y in (0..x) if y % 3 == 0
         };
@@ -185,8 +189,17 @@ mod tests {
         }
 
         assert_eq!(comprehension.iter_clauses.len(), 2);
+        assert!(matches!(
+            comprehension.iter_clauses[1].for_in_clause.iterable,
+            Expr::Paren(_)
+        ));
+        // eprintln!(
+        //     "{:#?}",
+        //     comprehension.iter_clauses[1].for_in_clause.iterable
+        // );
         assert!(comprehension.iter_clauses[0].if_clause.is_some());
         assert!(comprehension.iter_clauses[1].if_clause.is_some());
+
         eprintln!("Comprehension复杂的多层嵌套带条件的列表推导式测试通过");
 
         // 测试使用复杂表达式的列表推导式解析
