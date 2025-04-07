@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "better-comprehension"
+name = "better_comprehension"
 version = "1.0.0"
 dependencies = [
  "proc-macro2",

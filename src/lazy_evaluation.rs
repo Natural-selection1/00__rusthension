@@ -125,12 +125,7 @@ impl quote::ToTokens for LazyRefIterator {
 
 impl syn::parse::Parse for LazyRefIterator {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut iter_clauses = Vec::new();
-
-        let mapping = input.parse::<Mapping>()?;
-        while let Ok(iter_clause) = input.parse::<IterClause>() {
-            iter_clauses.push(iter_clause);
-        }
+        let (mapping, iter_clauses) = crate::common_parse(input);
 
         Ok(Self {
             mapping,

@@ -59,3 +59,19 @@ where
     };
     tokens.into()
 }
+
+pub(crate) fn common_parse(
+    input: syn::parse::ParseStream,
+) -> (crate::mapping::Mapping, Vec<iter_clause::IterClause>) {
+    let mut iter_clauses = Vec::new();
+
+    let mapping = input
+        .parse::<crate::mapping::Mapping>()
+        .unwrap_or_else(|e| panic!("{}", e));
+
+    while let Ok(iter_clause) = input.parse::<iter_clause::IterClause>() {
+        iter_clauses.push(iter_clause);
+    }
+
+    (mapping, iter_clauses)
+}
