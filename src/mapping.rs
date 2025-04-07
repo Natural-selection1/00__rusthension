@@ -19,8 +19,15 @@ impl syn::parse::Parse for Mapping {
         let mut left_value = None;
         let mut right_expr = None;
 
-        if input.peek(syn::Token![,]) {
-            input.parse::<Token![,]>()?;
+        // 检查是否存在任意一种键值对分隔符
+        if input.peek(syn::Token![=>]) || input.peek(syn::Token![,]) || input.peek(syn::Token![:]) {
+            if input.peek(syn::Token![:]) {
+                input.parse::<Token![:]>()?;
+            } else if input.peek(syn::Token![=>]) {
+                input.parse::<Token![=>]>()?;
+            } else if input.peek(syn::Token![,]) {
+                input.parse::<Token![,]>()?;
+            }
             left_value = Some(input.parse::<Expr>()?);
         }
 
@@ -54,8 +61,15 @@ impl syn::parse::Parse for MappingElse {
         let else_key = input.parse::<Expr>()?;
         let mut else_value = None;
 
-        if input.peek(syn::Token![,]) {
-            input.parse::<Token![,]>()?;
+        // 检查是否存在任意一种键值对分隔符
+        if input.peek(syn::Token![=>]) || input.peek(syn::Token![,]) || input.peek(syn::Token![:]) {
+            if input.peek(syn::Token![:]) {
+                input.parse::<Token![:]>()?;
+            } else if input.peek(syn::Token![=>]) {
+                input.parse::<Token![=>]>()?;
+            } else if input.peek(syn::Token![,]) {
+                input.parse::<Token![,]>()?;
+            }
             else_value = Some(input.parse::<Expr>()?);
         }
 
