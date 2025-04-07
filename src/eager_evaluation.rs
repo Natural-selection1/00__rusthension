@@ -93,46 +93,51 @@ pub(crate) fn handle_nested_loops<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mapping::{Mapping, MappingElse};
     use syn::Expr;
     use syn::parse_quote;
-
+    #[allow(unused_variables)]
     #[test]
     fn test_comprehension_parse() {
         // 测试基本的列表推导式解析
         let comprehension: VecComprehension = parse_quote! {
             x * 2 for x in vec![1, 2, 3]
         };
-        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
-        assert!(comprehension.mapping.right_expr.is_none());
+        let Mapping {
+            left_key,
+            left_value,
+            right_expr,
+        } = &comprehension.mapping;
+        assert!(matches!(left_key, Expr::Binary(_)));
+        assert!(right_expr.is_none());
         assert_eq!(comprehension.iter_clauses.len(), 1);
-        assert!(matches!(
-            comprehension.iter_clauses[0].for_in_clause.pat,
-            syn::Pat::Ident(_)
-        ));
-        assert!(matches!(
-            comprehension.iter_clauses[0].for_in_clause.iterable,
-            Expr::Macro(_)
-        ));
-        assert!(comprehension.iter_clauses[0].if_clause.is_none());
+        let iter_clause = &comprehension.iter_clauses[0];
+        let pat = &iter_clause.for_in_clause.pat;
+        let iterable = &iter_clause.for_in_clause.iterable;
+        assert!(matches!(pat, syn::Pat::Ident(_)));
+        assert!(matches!(iterable, Expr::Macro(_)));
+        assert!(iter_clause.if_clause.is_none());
         eprintln!("Comprehension基本列表推导式测试通过");
 
         // 测试带if条件的列表推导式解析
         let comprehension: VecComprehension = parse_quote! {
             x * 2 for x in 1..10 if x > 0
         };
-        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
-        assert!(comprehension.mapping.right_expr.is_none());
+        let Mapping {
+            left_key,
+            left_value,
+            right_expr,
+        } = &comprehension.mapping;
+        assert!(matches!(left_key, Expr::Binary(_)));
+        assert!(right_expr.is_none());
         assert_eq!(comprehension.iter_clauses.len(), 1);
-        assert!(matches!(
-            comprehension.iter_clauses[0].for_in_clause.pat,
-            syn::Pat::Ident(_)
-        ));
-        assert!(matches!(
-            comprehension.iter_clauses[0].for_in_clause.iterable,
-            Expr::Range(_)
-        ));
-        assert!(comprehension.iter_clauses[0].if_clause.is_some());
-        if let Some(if_clause) = &comprehension.iter_clauses[0].if_clause {
+        let iter_clause = &comprehension.iter_clauses[0];
+        let pat = &iter_clause.for_in_clause.pat;
+        let iterable = &iter_clause.for_in_clause.iterable;
+        assert!(matches!(pat, syn::Pat::Ident(_)));
+        assert!(matches!(iterable, Expr::Range(_)));
+        assert!(iter_clause.if_clause.is_some());
+        if let Some(if_clause) = &iter_clause.if_clause {
             assert!(matches!(if_clause.conditions, syn::Expr::Binary(_)));
         }
         eprintln!("Comprehension带if条件的列表推导式测试通过");
@@ -141,11 +146,21 @@ mod tests {
         let comprehension: VecComprehension = parse_quote! {
             x * 2 if x > 0 || x < 10 && x % 2 == 0 else 0 for x in items
         };
-        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
-        assert!(comprehension.mapping.right_expr.is_some());
-        if let Some(mapping_else) = &comprehension.mapping.right_expr {
-            assert!(matches!(mapping_else.conditions, Expr::Binary(_)));
-            assert!(matches!(mapping_else.else_key, Expr::Lit(_)));
+        let Mapping {
+            left_key,
+            left_value,
+            right_expr,
+        } = &comprehension.mapping;
+        assert!(matches!(left_key, Expr::Binary(_)));
+        assert!(right_expr.is_some());
+        if let Some(mapping_else) = right_expr {
+            let MappingElse {
+                conditions,
+                else_key,
+                else_value,
+            } = mapping_else;
+            assert!(matches!(conditions, Expr::Binary(_)));
+            assert!(matches!(else_key, Expr::Lit(_)));
         }
         assert_eq!(comprehension.iter_clauses.len(), 1);
         eprintln!("Comprehension带条件表达式的列表推导式测试通过");
@@ -154,23 +169,27 @@ mod tests {
         let comprehension: VecComprehension = parse_quote! {
             x + y for x in outer for y in inner
         };
-        assert!(matches!(comprehension.mapping.left_key, Expr::Binary(_)));
-        assert!(comprehension.mapping.right_expr.is_none());
+        let Mapping {
+            left_key,
+            left_value,
+            right_expr,
+        } = &comprehension.mapping;
+        assert!(matches!(left_key, Expr::Binary(_)));
+        assert!(right_expr.is_none());
         assert_eq!(comprehension.iter_clauses.len(), 2);
+        let first_clause = &comprehension.iter_clauses[0];
+        let second_clause = &comprehension.iter_clauses[1];
+        assert!(matches!(first_clause.for_in_clause.pat, syn::Pat::Ident(_)));
         assert!(matches!(
-            comprehension.iter_clauses[0].for_in_clause.pat,
-            syn::Pat::Ident(_)
-        ));
-        assert!(matches!(
-            comprehension.iter_clauses[0].for_in_clause.iterable,
+            first_clause.for_in_clause.iterable,
             syn::Expr::Path(_)
         ));
         assert!(matches!(
-            comprehension.iter_clauses[1].for_in_clause.pat,
+            second_clause.for_in_clause.pat,
             syn::Pat::Ident(_)
         ));
         assert!(matches!(
-            comprehension.iter_clauses[1].for_in_clause.iterable,
+            second_clause.for_in_clause.iterable,
             syn::Expr::Path(_)
         ));
         eprintln!("Comprehension多层嵌套的列表推导式测试通过");
@@ -181,24 +200,36 @@ mod tests {
             for x in (0..10) if x % 2 == 0
             for y in (0..x) if y % 3 == 0
         };
-        assert!(matches!(comprehension.mapping.left_key, Expr::Array(_)));
-        assert!(comprehension.mapping.right_expr.is_some());
-        if let Some(mapping_else) = &comprehension.mapping.right_expr {
-            assert!(matches!(mapping_else.conditions, Expr::Binary(_)));
-            assert!(matches!(mapping_else.else_key, Expr::Tuple(_)));
+        let Mapping {
+            left_key,
+            left_value,
+            right_expr,
+        } = &comprehension.mapping;
+        assert!(matches!(left_key, Expr::Array(_)));
+        assert!(right_expr.is_some());
+        if let Some(mapping_else) = right_expr {
+            let MappingElse {
+                conditions,
+                else_key,
+                else_value,
+            } = mapping_else;
+            assert!(matches!(conditions, Expr::Binary(_)));
+            assert!(matches!(else_key, Expr::Tuple(_)));
         }
 
         assert_eq!(comprehension.iter_clauses.len(), 2);
+        let first_clause = &comprehension.iter_clauses[0];
+        let second_clause = &comprehension.iter_clauses[1];
         assert!(matches!(
-            comprehension.iter_clauses[1].for_in_clause.iterable,
+            second_clause.for_in_clause.iterable,
             Expr::Paren(_)
         ));
         // eprintln!(
         //     "{:#?}",
         //     comprehension.iter_clauses[1].for_in_clause.iterable
         // );
-        assert!(comprehension.iter_clauses[0].if_clause.is_some());
-        assert!(comprehension.iter_clauses[1].if_clause.is_some());
+        assert!(first_clause.if_clause.is_some());
+        assert!(second_clause.if_clause.is_some());
 
         eprintln!("Comprehension复杂的多层嵌套带条件的列表推导式测试通过");
 
@@ -206,14 +237,17 @@ mod tests {
         let comprehension: VecComprehension = parse_quote! {
             x.method().call() for x in items.iter().filter(|i| i.is_valid())
         };
-        assert!(matches!(
-            comprehension.mapping.left_key,
-            Expr::MethodCall(_)
-        ));
-        assert!(comprehension.mapping.right_expr.is_none());
+        let Mapping {
+            left_key,
+            left_value,
+            right_expr,
+        } = &comprehension.mapping;
+        assert!(matches!(left_key, Expr::MethodCall(_)));
+        assert!(right_expr.is_none());
         assert_eq!(comprehension.iter_clauses.len(), 1);
+        let iter_clause = &comprehension.iter_clauses[0];
         assert!(matches!(
-            comprehension.iter_clauses[0].for_in_clause.iterable,
+            iter_clause.for_in_clause.iterable,
             Expr::MethodCall(_)
         ));
         eprintln!("Comprehension使用复杂表达式的列表推导式测试通过");
