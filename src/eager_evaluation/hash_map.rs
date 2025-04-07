@@ -22,6 +22,10 @@ impl quote::ToTokens for HashMapComprehension {
             iter_clauses,
         } = self;
 
+        if left_value.is_none() {
+            panic!("missing key-value pair");
+        }
+
         let mut nested_code = match right_expr {
             None => quote! {
                 __rusthension_hash_map.insert(#left_key, #left_value);
@@ -31,6 +35,10 @@ impl quote::ToTokens for HashMapComprehension {
                 else_key,
                 else_value,
             }) => {
+                if else_value.is_none() {
+                    panic!("missing key-value pair");
+                }
+
                 quote! {
                     if #conditions {
                         __rusthension_hash_map.insert(#left_key, #left_value);

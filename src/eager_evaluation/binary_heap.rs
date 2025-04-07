@@ -16,11 +16,15 @@ impl quote::ToTokens for BinaryHeapComprehension {
             mapping:
                 Mapping {
                     left_key,
+                    left_value,
                     right_expr,
-                    ..
                 },
             iter_clauses,
         } = self;
+
+        if left_value.is_some() {
+            panic!("BinaryHeap isn't key-value collection");
+        }
 
         let mut nested_code = match right_expr {
             None => quote! {

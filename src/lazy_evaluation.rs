@@ -5,9 +5,9 @@ use quote::quote;
 use syn::Expr;
 use syn::parse::ParseStream;
 
-/*-----------------LazyRefIterator------------------- */
+/*-----------------RefIterator------------------- */
 #[derive(Debug)]
-pub struct LazyRefIterator {
+pub struct IteratorRef {
     pub mapping: Mapping,
     pub iter_clauses: Vec<IterClause>,
 }
@@ -17,18 +17,22 @@ struct InfoContainer<'a> {
     paths: Vec<&'a Expr>,
 }
 
-impl quote::ToTokens for LazyRefIterator {
+impl quote::ToTokens for IteratorRef {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         // 解构以获得变量
-        let LazyRefIterator {
+        let IteratorRef {
             mapping:
                 Mapping {
                     left_key,
+                    left_value,
                     right_expr,
-                    ..
                 },
             iter_clauses,
         } = self;
+
+        if left_value.is_some() {
+            panic!("IteratorRef isn't key-value collection");
+        }
 
         let mut nested_code = match right_expr {
             None => quote! {
@@ -37,8 +41,12 @@ impl quote::ToTokens for LazyRefIterator {
             Some(MappingElse {
                 conditions,
                 else_key,
-                ..
+                else_value,
             }) => {
+                if else_value.is_some() {
+                    panic!("IteratorRef isn't key-value collection");
+                }
+
                 quote! {
                     if #conditions {
                         #left_key
@@ -60,7 +68,6 @@ impl quote::ToTokens for LazyRefIterator {
             let IterClause {
                 for_in_clause: ForInClause { pat, iterable },
                 if_clause,
-                ..
             } = iter_clause;
             info_container.depth += 1;
 
@@ -123,7 +130,7 @@ impl quote::ToTokens for LazyRefIterator {
     }
 }
 
-impl syn::parse::Parse for LazyRefIterator {
+impl syn::parse::Parse for IteratorRef {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let (mapping, iter_clauses) = crate::common_parse(input);
 

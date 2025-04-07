@@ -16,11 +16,15 @@ impl quote::ToTokens for LinkedListComprehension {
             mapping:
                 Mapping {
                     left_key,
+                    left_value,
                     right_expr,
-                    ..
                 },
             iter_clauses,
         } = self;
+
+        if left_value.is_some() {
+            panic!("LinkedList isn't key-value collection");
+        }
 
         let mut nested_code = match right_expr {
             None => quote! {
@@ -29,8 +33,12 @@ impl quote::ToTokens for LinkedListComprehension {
             Some(MappingElse {
                 conditions,
                 else_key,
-                ..
+                else_value,
             }) => {
+                if else_value.is_some() {
+                    panic!("LinkedList isn't key-value collection");
+                }
+
                 quote! {
                     if #conditions {
                         __rusthension_linked_list.push_back(#left_key);

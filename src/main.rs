@@ -142,75 +142,10 @@ fn test_ref_iterator() {
 
     // let result2 = iterator_ref![x for i in 1..=9 for x in vec_1 if x.contains("123")]; // 范围最内层
 
-    // let result3 =
-    // {
-    //     let vec_2 = vec_2.iter().collect::<Vec<_>>();
-    //     let vec_1 = vec_1.iter().collect::<Vec<_>>();
-    //     (vec_1)
-    //         .into_iter()
-    //         .filter_map(move |x|  x.contains("1") || x.contains("7") )
-    //         .then(|| {
-    //             let vec_2 = vec_2.clone();
-    //             (1..=9)
-    //                 .into_iter()
-    //                 .filter_map(move |i| true)
-    //                 .then(|| {
-    //                     let vec_2 = vec_2.clone();
-    //                     (vec_2)
-    //                         .into_iter()
-    //                         .filter_map(move |y|  y.contains("A") || y.contains("D") )
-    //                         .then(|| { (x, y) })
-    //                 })
-    //         })
-    // };
-
-    let result4 =
-
-
-    // {
-    //     let vec_2 = vec_2.iter().collect::<Vec<_>>();
-    //     let vec_1 = vec_1.iter().collect::<Vec<_>>();
-
-    //     (vec_1)
-    //         .into_iter()
-    //         .filter_map(move |x| {
-    //             (true && (x.contains("1") || x.contains("7")))
-    //             .then(|| {
-    //                 // 进入第二层
-
-    //                 let vec_2 = vec_2.clone();
-    //                 (1..=9).into_iter().filter_map(move |i| {
-    //                     (true && (x.contains("1") && i >= 8)).then(|| {
-    //                         // 进入第三层
-
-    //                         let vec_2 = vec_2.clone();
-    //                         (vec_2).into_iter().filter_map(move |y| {
-    //                             (true && (y.contains("A") || y.contains("D"))).then(|| {
-    //                                 // 进入第四层
-
-    //                                 if 1 > 2 { (y) } else { (y) }
-
-    //                                 //
-    //                             })
-    //                         })
-
-    //                         // 离开最内层
-    //                     })
-    //                 })
-
-    //                 //第二层结束
-    //             })
-    //         })
-    //         .flatten()
-    //         .flatten() // 有 n 层就要 n-1 次 flatten()
-    // };
-
-    iterator_ref![
+    let result3 = iterator_ref![
     (x, y)
     for x in vec_1 if x.contains("1") || x.contains("7")
     for i in 1..=9
-    for j in 1..=i
-    for k in 1..=j
     for y in vec_2 if y.contains("A") || y.contains("D") || x.contains("3")];
 
     // println!("{:#?}", result2);
