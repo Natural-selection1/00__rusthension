@@ -22,7 +22,7 @@ impl quote::ToTokens for VecDequeComprehension {
             iter_clauses,
         } = self;
 
-        let nested_code = match right_expr {
+        let mut nested_code = match right_expr {
             None => quote! {
                 __rusthension_vec_deque.push_back(#left_key);
             },
@@ -41,20 +41,17 @@ impl quote::ToTokens for VecDequeComprehension {
             }
         };
 
-        let nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
-
-        let output_code = {
-            quote! {
-                {
-                    use ::std::collections::VecDeque;
-                    let mut __rusthension_vec_deque = VecDeque::new();
-                    #nested_code
-                    __rusthension_vec_deque
-                }
+        nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
+        nested_code = quote! {
+            {
+                use ::std::collections::VecDeque;
+                let mut __rusthension_vec_deque = VecDeque::new();
+                #nested_code
+                __rusthension_vec_deque
             }
         };
 
-        tokens.extend(output_code);
+        tokens.extend(nested_code);
     }
 }
 

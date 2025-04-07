@@ -22,7 +22,7 @@ impl quote::ToTokens for LinkedListComprehension {
             iter_clauses,
         } = self;
 
-        let nested_code = match right_expr {
+        let mut nested_code = match right_expr {
             None => quote! {
                 __rusthension_linked_list.push_back(#left_key);
             },
@@ -41,20 +41,17 @@ impl quote::ToTokens for LinkedListComprehension {
             }
         };
 
-        let nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
-
-        let output_code = {
-            quote! {
-                {
-                    use ::std::collections::LinkedList;
-                    let mut __rusthension_linked_list = LinkedList::new();
-                    #nested_code
-                    __rusthension_linked_list
-                }
+        nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
+        nested_code = quote! {
+            {
+                use ::std::collections::LinkedList;
+                let mut __rusthension_linked_list = LinkedList::new();
+                #nested_code
+                __rusthension_linked_list
             }
         };
 
-        tokens.extend(output_code);
+        tokens.extend(nested_code);
     }
 }
 

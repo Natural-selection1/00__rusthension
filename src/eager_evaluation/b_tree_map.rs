@@ -22,7 +22,7 @@ impl quote::ToTokens for BTreeMapComprehension {
             iter_clauses,
         } = self;
 
-        let nested_code = match right_expr {
+        let mut nested_code = match right_expr {
             None => quote! {
                 __rusthension_b_tree_map.insert(#left_key, #left_value);
             },
@@ -41,20 +41,17 @@ impl quote::ToTokens for BTreeMapComprehension {
             }
         };
 
-        let nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
-
-        let output_code = {
-            quote! {
-                {
-                    use ::std::collections::BTreeMap;
-                    let mut __rusthension_b_tree_map = BTreeMap::new();
-                    #nested_code
-                    __rusthension_b_tree_map
-                }
+        nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
+        nested_code = quote! {
+            {
+                use ::std::collections::BTreeMap;
+                let mut __rusthension_b_tree_map = BTreeMap::new();
+                #nested_code
+                __rusthension_b_tree_map
             }
         };
 
-        tokens.extend(output_code);
+        tokens.extend(nested_code);
     }
 }
 

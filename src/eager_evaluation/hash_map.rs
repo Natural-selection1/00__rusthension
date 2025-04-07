@@ -22,7 +22,7 @@ impl quote::ToTokens for HashMapComprehension {
             iter_clauses,
         } = self;
 
-        let nested_code = match right_expr {
+        let mut nested_code = match right_expr {
             None => quote! {
                 __rusthension_hash_map.insert(#left_key, #left_value);
             },
@@ -41,20 +41,17 @@ impl quote::ToTokens for HashMapComprehension {
             }
         };
 
-        let nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
-
-        let output_code = {
-            quote! {
-                {
-                    use ::std::collections::HashMap;
-                    let mut __rusthension_hash_map = HashMap::new();
-                    #nested_code
-                    __rusthension_hash_map
-                }
+        nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
+        nested_code = quote! {
+            {
+                use ::std::collections::HashMap;
+                let mut __rusthension_hash_map = HashMap::new();
+                #nested_code
+                __rusthension_hash_map
             }
         };
 
-        tokens.extend(output_code);
+        tokens.extend(nested_code);
     }
 }
 
