@@ -1,7 +1,21 @@
 [package]
 name = "better_comprehension"
+authors = ["Hegui Dai <natural_selection_@outlook.com>"]
+description = "collection and iterator comprehensions for Rust"
+license = "MIT"
+keywords = [
+    "macro",
+    "procedural",
+    "procedural-macro",
+    "collection-comprehension",
+    "iterator-comprehension",
+    "comprehension",
+]
+repository = "https://github.com/Natural-selection1/better-comprehension-in-rust"
+readme = "README.md"
 version = "1.0.0"
 edition = "2024"
+exclude = ["src/main.rs", "target",".vscode"]
 
 
 [lib]
