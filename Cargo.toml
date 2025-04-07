@@ -12,9 +12,9 @@ keywords = [
 ]
 repository = "https://github.com/Natural-selection1/better-comprehension-in-rust"
 readme = "README.md"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
-exclude = ["src/main.rs", "target", ".vscode"]
+exclude = ["src/main.rs", "target", ".vscode", "README-CN.md",".gitignore"]
 
 
 [lib]
