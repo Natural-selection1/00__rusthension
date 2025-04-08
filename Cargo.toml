@@ -14,13 +14,13 @@ repository = "https://github.com/Natural-selection1/better-comprehension-in-rust
 readme = "README.md"
 version = "1.1.0"
 edition = "2024"
-exclude = ["src/main.rs", "target", ".vscode", "README-CN.md",".gitignore"]
+exclude = ["src/main.rs", "target", ".vscode", "README-CN.md", ".gitignore"]
 
 
 [lib]
 proc-macro = true
 
 [dependencies]
-syn = { version = "2.0.100", features = ["full", "extra-traits"] }
+syn = { version = "2.0.100", features = ["full", "visit", "extra-traits"] }
 quote = "1.0.40"
 proc-macro2 = "1.0.94"

@@ -18,6 +18,7 @@ fn main() {
     test_pattern_matching();
     test_nested_comprehension();
     test_ownership_handling();
+    test_option();
 }
 
 fn test_vec() {
@@ -349,4 +350,20 @@ fn test_ref_iterator() {
     // 验证原始集合未被消耗
     assert_eq!(vec_1.len(), 3);
     assert_eq!(vec_2.len(), 3);
+}
+
+fn test_option() {
+    let vec = [Some("1".to_string()), None, Some("3".to_string())];
+
+    let _result = vector![
+        x.clone()
+        for x in vec.iter().flatten()
+    ];
+
+    let mut result = Vec::new();
+    for x in vec.iter().flatten() {
+        result.push(x.clone());
+    }
+
+    assert_eq!(result, vec!["1".to_string(), "3".to_string()]);
 }

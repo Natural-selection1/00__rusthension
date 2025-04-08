@@ -43,19 +43,18 @@ pub(crate) fn handle_nested_loops<'a>(
                 need_to_shadow.push(iterable);
                 quote! { &#iterable }
             }
-            Expr::MethodCall(method_call) => {
-                let method_name = &method_call.method;
-                if method_name == "iter" {
-                    quote! { #iterable }
-                } else {
-                    panic!("不支持的类型: {:?}", iterable);
-                }
-            }
+            Expr::MethodCall(_) => match crate::is_iter(iterable) {
+                true => quote! { #iterable },
+                _ => panic!(
+                    "please ensure the first method call is iter(): {:?}",
+                    iterable
+                ),
+            },
             Expr::Paren(expr) => {
                 let iterable = &*expr.expr;
                 quote! { #iterable }
             }
-            _ => panic!("不支持的类型: {:?}", iterable),
+            _ => panic!("type is not supported: {:?}", iterable),
         };
 
         // 根据是否有if条件生成循环代码
