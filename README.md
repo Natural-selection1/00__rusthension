@@ -185,14 +185,13 @@ The above writing is equivalent to the following writing
 ```rust
 let vec_1 = ["123".to_string(), "456".to_string(), "789".to_string()];
 let vec_2 = ["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
-
 let mut result3 = {
     let vec_2 = vec_2.iter().collect::<Vec<_>>();
     let vec_1 = vec_1.iter().collect::<Vec<_>>();
     (vec_1).into_iter().filter_map(move |x| {
         (x.contains("1") || x.contains("7")).then(|| {
             let vec_2 = vec_2.clone();
-            (1..=2).into_iter().filter_map(move |i| {
+            (1..=2).into_iter().filter_map(move |_| {
                 (true).then(|| {
                     let vec_2 = vec_2.clone();
                     (vec_2).into_iter().filter_map(move |y| {
@@ -207,8 +206,9 @@ let mut result3 = {
                 })
             })
         })
-        .flatten()
-        .flatten()
+    })
+    .flatten()
+    .flatten()
 };
 ```
 
