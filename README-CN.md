@@ -3,8 +3,7 @@
 在rust中的集合推导式和迭代器推导式, 提供更好的Rust使用体验
 
 # 用法
-语法源自 [python推导式]
-(https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
+语法源自 [python推导式](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
 
 本库为Rust标准库中的所有集合类型提供宏，以及基于引用的迭代器
 

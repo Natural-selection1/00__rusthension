@@ -7,8 +7,7 @@ And it provides a better experience in Rust.
 
 # Usage
 
-The syntax is derived from [Python's comprehension]
-(https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
+The syntax is derived from [Python's comprehension](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
 
 This library provides macros for all collection types
 in the Rust standard library and an Iterator based on references.
