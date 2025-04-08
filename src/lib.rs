@@ -179,6 +179,10 @@
 //!
 //! this iterator comprehension is based on references,
 //! so it will not consume ownership.
+//! By the way, to ensure the correctness of the iterator comprehension,
+//! only two types of iterable objects are allowed to be passed in:
+//! * single identifier (not followed by any method calls)
+//! * range expression (e.g., 1..=3 or 1..x where x is an number)
 //! ```rust
 //! use better_comprehension::iterator_ref;
 //! let vec_1 = ["123".to_string(),
