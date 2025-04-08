@@ -1,9 +1,10 @@
 # better_comprehension
 
-在rust中的集合推导式和迭代器推导式。提供更好的Rust使用体验
+在rust中的集合推导式和迭代器推导式, 提供更好的Rust使用体验
 
 # 用法
-语法源自[python推导式](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
+语法源自 [python推导式]
+(https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
 
 本库为Rust标准库中的所有集合类型提供宏，以及基于引用的迭代器
 
@@ -65,7 +66,8 @@ let vec = vector![
     (top,bottom)
     for top in 1..=3 if top != 2
     for bottom in 4..=6 if bottom+top != 4];
-assert_eq!(vec, vec![(1, 4), (1, 5), (1, 6), (3, 4), (3, 5), (3, 6)]);
+assert_eq!(vec, vec![(1, 4), (1, 5), (1, 6),
+                     (3, 4), (3, 5), (3, 6)]);
 ```
 
 需要注意的是, 由于在rust中, for loop 是消耗所有权的.
@@ -107,7 +109,8 @@ println!("{:?}", vec_2); // work well
 
 但在本库中, 你不需要这么做, 提供的宏会自动帮你处理这些问题.
 
-你唯一需要做的就是在你想要保留所有权的变量后面加上.iter() 或 使用 & , 其余会在宏内自动处理.
+你唯一需要做的就是在你想要保留所有权的变量后面`加上.iter()`或`使用 &`,
+其余会在宏内自动处理.
 ```rust
 let vec_1 = vec!["ABC".to_string(), "DEF".to_string()];
 let vec_2 = vec!["abc".to_string(), "def".to_string()];
@@ -128,23 +131,25 @@ println!("{:?}", vec_2); // work well
 同时, 该库还支持键值对容器类型, HashMap, BTreeMap
 
 ```rust
-let vec_key = vec!["key_1".to_string(), "key_2".to_string(), "key_3".to_string()];
-    let vec_value = [1, 2, 3];
-    let hash_map = hash_map!{
-        key.clone() : *value // 三种键值对分隔符都支持
-        // key.clone() => *value
-        // key.clone() , *value
-        for key in vec_key
-        for value in vec_value
-    };
-    assert_eq!(
-        hash_map,
-        HashMap::from([
-        ("key_1".to_string(), 3),
-        ("key_2".to_string(), 3),
-        ("key_3".to_string(), 3)
-        ])
-    );
+let vec_key = vec!["key_1".to_string(),
+                   "key_2".to_string(),
+                   "key_3".to_string()];
+let vec_value = [1, 2, 3];
+let hash_map = hash_map!{
+    key.clone() : *value // 三种键值对分隔符都支持
+    // key.clone() => *value
+    // key.clone() , *value
+    for key in vec_key
+    for value in vec_value
+};
+assert_eq!(
+    hash_map,
+    HashMap::from([
+    ("key_1".to_string(), 3),
+    ("key_2".to_string(), 3),
+    ("key_3".to_string(), 3)
+    ])
+);
 ```
 ---
 
@@ -154,8 +159,12 @@ let vec_key = vec!["key_1".to_string(), "key_2".to_string(), "key_3".to_string()
 
 除此之外的写法与集合推导式完全相同
 ```rust
-let vec_1 = ["123".to_string(), "456".to_string(), "789".to_string()];
-let vec_2 = ["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
+let vec_1 = ["123".to_string(),
+             "456".to_string(),
+             "789".to_string()];
+let vec_2 = ["ABC".to_string(),
+             "DEF".to_string(),
+             "GHI".to_string()];
 
 let mut result3 = iterator_ref![
 (x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
@@ -163,6 +172,9 @@ for x in vec_1 if x.contains("1") || x.contains("7")
 for i in 1..=2
 for y in vec_2 if y.contains("D") || x.contains("3")];
 
+// still alive
+println!("{:?}", vec_1);
+println!("{:?}", vec_2);
 
 for _ in 0..=9 {
     println!("{:?}", result3.next());
@@ -183,8 +195,13 @@ None
 
 以上写法与下面的写法是完全的等价形式
 ```rust
-let vec_1 = ["123".to_string(), "456".to_string(), "789".to_string()];
-let vec_2 = ["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
+let vec_1 = ["123".to_string(),
+             "456".to_string(),
+             "789".to_string()];
+let vec_2 = ["ABC".to_string(),
+             "DEF".to_string(),
+             "GHI".to_string()];
+
 let mut result3 = {
     let vec_2 = vec_2.iter().collect::<Vec<_>>();
     let vec_1 = vec_1.iter().collect::<Vec<_>>();
@@ -215,18 +232,18 @@ let mut result3 = {
 
 # 一些细节
 
-vector! :       使用push()添加元素
+vector! :       push() 添加元素
 
-vec_deque! :    使用push_back()添加元素
+binary_heap! :  push() 添加元素
 
-linked_list! :  使用push_back()添加元素
+vec_deque! :    push_back() 添加元素
 
-hash_set! :     使用insert()添加元素
+linked_list! :  push_back() 添加元素
 
-hash_map! :     使用insert()添加键值对
+hash_set! :     insert() 添加元素
 
-b_tree_map! :   使用insert()添加键值对
+hash_map! :     insert() 添加键值对
 
-b_tree_set! :   使用insert()添加元素
+b_tree_map! :   insert() 添加键值对
 
-binary_heap! :  使用push()添加元素
+b_tree_set! :   insert() 添加元素

@@ -1,13 +1,15 @@
 //! # better_comprehension
 //! [中文README](https://github.com/Natural-selection1/better-comprehension-in-rust/blob/master/README-CN.md)
 //!
-//! Collection comprehension and Iterator comprehension in Rust. And it provides a better experience in Rust.
+//! Collection comprehension and Iterator comprehension in Rust.
+//! And it provides a better experience in Rust.
 //!
 //! # Usage
 //!
 //! The syntax is derived from [Python's comprehension](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
 //!
-//! This library provides macros for all collection types in the Rust standard library and an Iterator based on references.
+//! This library provides macros for all collection types
+//! in the Rust standard library and an Iterator based on references.
 //!
 //! ---
 //! simple example
@@ -65,7 +67,8 @@
 //! assert_eq!(binary_heap.into_sorted_vec(), vec![1, 1, 3, 13]);
 //! ```
 //! ---
-//! the reading order of the for loop in this library is from top to bottom, just like Python's comprehension.
+//! the reading order of the for loop in this library is from top to bottom,
+//! just like Python's comprehension.
 //! ```rust
 //! use better_comprehension::vector;
 //! let vec = vector![
@@ -78,7 +81,9 @@
 //! ---
 //!
 //! Note that in Rust, for loops consume ownership.
-//! So typically, for nested loops, if you want the original container to be consumed, you should write it like this:
+//! So typically, for nested loops,
+//! if you want the original container to be consumed,
+//! you should write it like this:
 //!
 //! ```rust
 //! use better_comprehension::vector;
@@ -122,7 +127,8 @@
 //!
 //! the provided macros will automatically handle these problems for you.
 //!
-//! You only need to add .iter() or use & before the variable you want to keep ownership,
+//! You only need to add `.iter()` or
+//! use `&` before the variable you want to keep ownership,
 //!
 //! the rest will be automatically handled in the macro.
 //! ```rust
@@ -146,7 +152,9 @@
 //! ```rust
 //! use better_comprehension::hash_map;
 //! use std::collections::HashMap;
-//! let vec_key = vec!["key_1".to_string(), "key_2".to_string(), "key_3".to_string()];
+//! let vec_key = vec!["key_1".to_string(),
+//!                    "key_2".to_string(),
+//!                    "key_3".to_string()];
 //! let vec_value = [1, 2, 3];
 //! let hash_map = hash_map!{
 //!     // the following three key-value pair separators are supported
@@ -166,20 +174,29 @@
 //! );
 //! ```
 //! ---
-//! Iterator comprehension is also supported,but unlike the collection comprehension above,
+//! Iterator comprehension is also supported,
+//! but unlike the collection comprehension above,
 //!
-//! this iterator comprehension is based on references,so it will not consume ownership.
+//! this iterator comprehension is based on references,
+//! so it will not consume ownership.
 //! ```rust
 //! use better_comprehension::iterator_ref;
-//! let vec_1 = ["123".to_string(), "456".to_string(), "789".to_string()];
-//! let vec_2 = ["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
-
+//! let vec_1 = ["123".to_string(),
+//!              "456".to_string(),
+//!              "789".to_string()];
+//! let vec_2 = ["ABC".to_string(),
+//!              "DEF".to_string(),
+//!              "GHI".to_string()];
 //! let mut result3 = iterator_ref![
 //!     (x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
 //!     for x in vec_1 if x.contains("1") || x.contains("7")
 //!     for i in 1..=2
 //!     for y in vec_2 if y.contains("D") || x.contains("3")];
-
+//!
+//! // still alive
+//! println!("{:?}", vec_1);
+//! println!("{:?}", vec_2);
+//!
 //! for _ in 0..=9 {
 //!     println!("{:?}", result3.next());
 //! }
@@ -199,8 +216,13 @@
 
 //! The above writing is equivalent to the following writing
 //!```rust
-//!let vec_1 = ["123".to_string(), "456".to_string(), "789".to_string()];
-//!let vec_2 = ["ABC".to_string(), "DEF".to_string(), "GHI".to_string()];
+//!let vec_1 = ["123".to_string(),
+//!             "456".to_string(),
+//!             "789".to_string()];
+//!let vec_2 = ["ABC".to_string(),
+//!             "DEF".to_string(),
+//!             "GHI".to_string()];
+//!
 //!let mut result3 = {
 //!    let vec_2 = vec_2.iter().collect::<Vec<_>>();
 //!    let vec_1 = vec_1.iter().collect::<Vec<_>>();
