@@ -217,7 +217,7 @@
 //! None
 //! */
 //! ```
-
+//!
 //! The above writing is equivalent to the following writing
 //!```rust
 //!let vec_1 = ["123".to_string(),

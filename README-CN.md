@@ -8,32 +8,38 @@
 本库为Rust标准库中的所有集合类型提供宏，以及基于引用的迭代器
 
 ---
+
 简单示例
-
 ```rust
+use better_comprehension::vector;
 let vec_1 = vec!["AB".to_string(), "CD".to_string()];
-
 let vec: Vec<String> = vector![x.clone() for x in vec_1];
 assert_eq!(vec, vec!["AB".to_string(), "CD".to_string()]);
 ```
-
 ---
+
 你也可以在推导式中使用模式
 ```rust
+use better_comprehension::vec_deque;
+use std::collections::VecDeque;
 struct Person {
     name: String,
     age: i32,
 }
 let people = [Person { name: "Joe".to_string(), age: 20 },
               Person { name: "Bob".to_string(), age: 25 }];
-
-let vec_deque = vec_deque![name.clone() for Person { name, .. } in people];
-assert_eq!(vec_deque, VecDeque::from(["Joe".to_string(), "Bob".to_string()]));
+let vec_deque = vec_deque![ name.clone()
+                            for Person { name, ..} in people];
+assert_eq!(vec_deque,
+           VecDeque::from(["Joe".to_string(),
+                           "Bob".to_string()]));
 ```
 ---
 
 过滤集合中的值
 ```rust
+use better_comprehension::linked_list;
+use std::collections::LinkedList;
 let linked_list = linked_list![ i*2 for i in 1..=3 if i != 2 ];
 assert_eq!(linked_list, LinkedList::from([2, 6]));
 ```
@@ -41,6 +47,8 @@ assert_eq!(linked_list, LinkedList::from([2, 6]));
 
 根据条件返回不同的值
 ```rust
+use better_comprehension::b_tree_set;
+use std::collections::BTreeSet;
 let b_tree_set = b_tree_set!{
     i if i-1 == 0 else i+10
     for i in 1..=3 if i != 2
@@ -49,8 +57,11 @@ assert_eq!(b_tree_set, BTreeSet::from([1, 13]));
 ```
 
 ---
+
 嵌套推导式
 ```rust
+use better_comprehension::binary_heap;
+use std::collections::BinaryHeap;
 let binary_heap = binary_heap![
     i if (i-1 == 0 || j -2 == 0) else i+10
     for i in 1..=3 if i != 2
@@ -61,6 +72,7 @@ assert_eq!(binary_heap.into_sorted_vec(), vec![1, 1, 3, 13]);
 
 和python的推导式一样, 本库的for循环是从上到下读取的.
 ```rust
+use better_comprehension::vector;
 let vec = vector![
     (top,bottom)
     for top in 1..=3 if top != 2
@@ -73,6 +85,7 @@ assert_eq!(vec, vec![(1, 4), (1, 5), (1, 6),
 
 所以通常来说, 对于多层循环, 如果你希望原容器被消耗, 你应该写成如下这样:
 ```rust
+use better_comprehension::vector;
 let vec_1 = vec!["ABC".to_string(), "DEF".to_string()];
 let vec_2 = vec!["abc".to_string(), "def".to_string()];
 let vec_3 = vec![123, 456];
@@ -111,6 +124,7 @@ println!("{:?}", vec_2); // work well
 你唯一需要做的就是在你想要保留所有权的变量后面`加上.iter()`或`使用 &`,
 其余会在宏内自动处理.
 ```rust
+use better_comprehension::vector;
 let vec_1 = vec!["ABC".to_string(), "DEF".to_string()];
 let vec_2 = vec!["abc".to_string(), "def".to_string()];
 let vec_3 = vec![123, 456];
@@ -130,6 +144,8 @@ println!("{:?}", vec_2); // work well
 同时, 该库还支持键值对容器类型, HashMap, BTreeMap
 
 ```rust
+use better_comprehension::hash_map;
+use std::collections::HashMap;
 let vec_key = vec!["key_1".to_string(),
                    "key_2".to_string(),
                    "key_3".to_string()];
@@ -144,9 +160,9 @@ let hash_map = hash_map!{
 assert_eq!(
     hash_map,
     HashMap::from([
-    ("key_1".to_string(), 3),
-    ("key_2".to_string(), 3),
-    ("key_3".to_string(), 3)
+        ("key_1".to_string(), 3),
+        ("key_2".to_string(), 3),
+        ("key_3".to_string(), 3)
     ])
 );
 ```
@@ -163,6 +179,7 @@ assert_eq!(
 * 范围表达式(如: 1..=3)
 
 ```rust
+use better_comprehension::iterator_ref;
 let vec_1 = ["123".to_string(),
              "456".to_string(),
              "789".to_string()];
@@ -171,10 +188,10 @@ let vec_2 = ["ABC".to_string(),
              "GHI".to_string()];
 
 let mut result3 = iterator_ref![
-(x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
-for x in vec_1 if x.contains("1") || x.contains("7")
-for i in 1..=2
-for y in vec_2 if y.contains("D") || x.contains("3")];
+    (x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
+    for x in vec_1 if x.contains("1") || x.contains("7")
+    for i in 1..=2
+    for y in vec_2 if y.contains("D") || x.contains("3")];
 
 // still alive
 println!("{:?}", vec_1);
@@ -255,6 +272,8 @@ b_tree_set! :   insert() 添加元素
 # 一些实际的例子
 
 ```rust
+use better_comprehension::vector;
+use std::collections::{HashMap, BTreeMap};
 // 创建3x3矩阵
 let matrix = vector![
     vector![i * 3 + j + 1 for j in 0..3]
@@ -268,15 +287,21 @@ vector![row[i]
 for i in 0..3
 ];
 // matrix is alive
-assert_eq!(matrix, vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]]);
+assert_eq!(matrix, vec![vec![1, 2, 3],
+                        vec![4, 5, 6],
+                        vec![7, 8, 9]]);
 assert_eq!(
     transposed,
-    vec![vec![1, 4, 7], vec![2, 5, 8], vec![3, 6, 9]]
+    vec![vec![1, 4, 7],
+         vec![2, 5, 8],
+         vec![3, 6, 9]]
 );
 ```
 
 
 ```rust
+use better_comprehension::{hash_map, b_tree_map, vector};
+use std::collections::{HashMap, BTreeMap};
 #[derive(Debug, PartialEq, Eq)]
 struct Score {
     subject: &'static str,
@@ -342,8 +367,8 @@ let math_scores: HashMap<&String, u8> = hash_map![
 
 assert_eq!(
     math_scores,
-    HashMap::from([(&"Alice".to_string(), 95), (&"Bob".to_string(), 78)])
-);
+    HashMap::from([(&"Alice".to_string(), 95),
+                   (&"Bob".to_string(), 78)]));
 
 // use for loop
 let high_scores = {
