@@ -357,11 +357,6 @@ fn test_ref_iterator() {
 fn test_option() {
     let vec = [Some("1".to_string()), None, Some("3".to_string())];
 
-    let result = vector![
-        x.clone()
-        for x in vec.iter().flatten()
-    ];
-
     let result = {
         let mut result = Vec::new();
         for x in vec.iter().flatten() {
@@ -369,6 +364,11 @@ fn test_option() {
         }
         result
     };
+    // ↓ 等价于 ↓
+    let result = vector![
+        x.clone()
+        for x in vec.iter().flatten()
+    ];
 
     assert_eq!(result, vec!["1".to_string(), "3".to_string()]);
 }
@@ -397,7 +397,7 @@ fn some_real_example_1() {
 fn some_real_example_2() {
     #[derive(Debug, PartialEq, Eq)]
     struct Score {
-        subject: String,
+        subject: &'static str,
         score: u8,
     }
     #[derive(Debug, PartialEq, Eq)]
@@ -413,11 +413,11 @@ fn some_real_example_2() {
             age: 20,
             scores: vec![
                 Score {
-                    subject: "Math".to_string(),
+                    subject: "Math",
                     score: 95,
                 },
                 Score {
-                    subject: "English".to_string(),
+                    subject: "English",
                     score: 88,
                 },
             ],
@@ -427,25 +427,29 @@ fn some_real_example_2() {
             age: 21,
             scores: vec![
                 Score {
-                    subject: "Math".to_string(),
+                    subject: "Math",
                     score: 78,
                 },
                 Score {
-                    subject: "English".to_string(),
+                    subject: "English",
                     score: 85,
                 },
             ],
         },
     ];
 
-    // for student in &students_data {
-    //     for score in &student.scores {
-    //         if score.subject == "Math" {
-    //             println!("{}: {}", student.name, score.score);
-    //         }
-    //     }
-    // }
-
+    let math_scores: HashMap<&String, u8> = {
+        let mut math_scores = HashMap::new();
+        for student in &students_data {
+            for score in &student.scores {
+                if score.subject == "Math" {
+                    math_scores.insert(&student.name, score.score);
+                }
+            }
+        }
+        math_scores
+    };
+    // ↓ 等价于 ↓
     let math_scores: HashMap<&String, u8> = hash_map![
         &student.name => score.score
         for student in &students_data
@@ -455,5 +459,33 @@ fn some_real_example_2() {
     assert_eq!(
         math_scores,
         HashMap::from([(&"Alice".to_string(), 95), (&"Bob".to_string(), 78)])
+    );
+
+    let high_scores = {
+        let mut high_scores = BTreeMap::new();
+        for student in &students_data {
+            let mut subjects = Vec::new();
+            for score in &student.scores {
+                if score.score >= 85 {
+                    subjects.push(score.subject);
+                }
+            }
+            high_scores.insert(&student.name, subjects);
+        }
+        high_scores
+    };
+    // ↓ 等价于 ↓
+    let high_scores = b_tree_map![
+        &student.name =>
+            vector![score.subject for score in &student.scores if score.score >= 85]
+        for student in &students_data
+    ];
+
+    assert_eq!(
+        high_scores,
+        BTreeMap::from([
+            (&"Alice".to_string(), vec!["Math", "English"]),
+            (&"Bob".to_string(), vec!["English"])
+        ])
     );
 }

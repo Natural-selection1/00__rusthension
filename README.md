@@ -261,3 +261,128 @@ b_tree_set! : insert() to add elements
 hash_map! : insert() to add key-value pairs
 
 b_tree_map! : insert() to add key-value pairs
+
+
+# some real examples
+
+```rust
+// create a 3x3 matrix
+let matrix = vector![
+    vector![i * 3 + j + 1 for j in 0..3]
+    for i in 0..3
+];
+
+// transpose the matrix
+let transposed = vector![
+vector![row[i]
+        for row in matrix.iter()]
+for i in 0..3
+];
+// matrix is alive
+assert_eq!(matrix, vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]]);
+assert_eq!(
+    transposed,
+    vec![vec![1, 4, 7], vec![2, 5, 8], vec![3, 6, 9]]
+);
+```
+
+
+```rust
+#[derive(Debug, PartialEq, Eq)]
+struct Score {
+    subject: &'static str,
+    score: u8,
+}
+#[derive(Debug, PartialEq, Eq)]
+struct Student {
+    name: String,
+    age: u8,
+    scores: Vec<Score>,
+}
+
+let students_data = [
+    Student {
+        name: "Alice".to_string(),
+        age: 20,
+        scores: vec![
+            Score {
+                subject: "Math",
+                score: 95,
+            },
+            Score {
+                subject: "English",
+                score: 88,
+            },
+        ],
+    },
+    Student {
+        name: "Bob".to_string(),
+        age: 21,
+        scores: vec![
+            Score {
+                subject: "Math",
+                score: 78,
+            },
+            Score {
+                subject: "English",
+                score: 85,
+            },
+        ],
+    },
+];
+
+// use for loop
+let math_scores: HashMap<&String, u8> = {
+    let mut math_scores = HashMap::new();
+    for student in &students_data {
+        for score in &student.scores {
+            if score.subject == "Math" {
+                math_scores.insert(&student.name, score.score);
+            }
+        }
+    }
+    math_scores
+};
+// ↓ is equivalent to ↓
+// use comprehension!
+let math_scores: HashMap<&String, u8> = hash_map![
+    &student.name => score.score
+    for student in &students_data
+    for score in &student.scores if score.subject == "Math"
+];
+
+assert_eq!(
+    math_scores,
+    HashMap::from([(&"Alice".to_string(), 95), (&"Bob".to_string(), 78)])
+);
+
+// use for loop
+let high_scores = {
+    let mut high_scores = BTreeMap::new();
+    for student in &students_data {
+        let mut subjects = Vec::new();
+        for score in &student.scores {
+            if score.score >= 85 {
+                subjects.push(score.subject);
+            }
+        }
+        high_scores.insert(&student.name, subjects);
+    }
+    high_scores
+};
+// ↓ is equivalent to ↓
+// use comprehension!
+let high_scores = b_tree_map![
+    &student.name =>
+        vector![score.subject for score in &student.scores if score.score >= 85]
+    for student in &students_data
+];
+
+assert_eq!(
+    high_scores,
+    BTreeMap::from([
+        (&"Alice".to_string(), vec!["Math", "English"]),
+        (&"Bob".to_string(), vec!["English"])
+    ])
+);
+```
