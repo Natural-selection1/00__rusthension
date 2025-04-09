@@ -28,7 +28,7 @@ impl quote::ToTokens for VecComprehension {
 
         let mut nested_code = match right_expr {
             None => quote! {
-                __rusthension_vec.push(#left_key);
+                __vector_comprehension.push(#left_key);
             },
             Some(MappingElse {
                 conditions,
@@ -41,9 +41,9 @@ impl quote::ToTokens for VecComprehension {
 
                 quote! {
                     if #conditions {
-                        __rusthension_vec.push(#left_key);
+                        __vector_comprehension.push(#left_key);
                     } else {
-                        __rusthension_vec.push(#else_key);
+                        __vector_comprehension.push(#else_key);
                     }
                 }
             }
@@ -52,9 +52,9 @@ impl quote::ToTokens for VecComprehension {
         nested_code = crate::eager_evaluation::handle_nested_loops(iter_clauses, nested_code);
         nested_code = quote! {
             {
-                let mut __rusthension_vec = Vec::new();
+                let mut __vector_comprehension = Vec::new();
                 #nested_code
-                __rusthension_vec
+                __vector_comprehension
             }
         };
 

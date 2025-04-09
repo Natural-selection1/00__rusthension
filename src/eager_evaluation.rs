@@ -43,7 +43,7 @@ pub(crate) fn handle_nested_loops<'a>(
                 need_to_shadow.push(iterable);
                 quote! { &#iterable }
             }
-            Expr::MethodCall(_) => match crate::is_iter(iterable) {
+            Expr::MethodCall(_) => match is_iter(iterable) {
                 true => quote! { #iterable },
                 _ => panic!(
                     "please ensure the first method call is iter(): \n{:#?}",
@@ -87,6 +87,46 @@ pub(crate) fn handle_nested_loops<'a>(
     }
 
     nested_code
+}
+
+struct IterMethodCallFinder {
+    is_iter: bool,
+}
+
+use syn::{ExprMethodCall, visit::Visit};
+impl<'ast> Visit<'ast> for IterMethodCallFinder {
+    fn visit_expr_method_call(&mut self, node: &'ast ExprMethodCall) {
+        match *node.receiver {
+            syn::Expr::Path(_) | syn::Expr::Field(_) => {
+                if node.method == "iter" {
+                    self.is_iter = true;
+                }
+            }
+            _ => syn::visit::visit_expr(&mut *self, &node.receiver),
+        }
+    }
+}
+
+fn is_iter(expr: &syn::Expr) -> bool {
+    let mut finder = IterMethodCallFinder { is_iter: false };
+    finder.visit_expr(expr);
+
+    finder.is_iter
+}
+
+#[test]
+fn test_is_iter() {
+    // 最右侧是iter方法
+    let expr = syn::parse_quote!(some.method_1().method_2().iter());
+    assert!(!is_iter(&expr));
+    eprintln!("--------------------------------");
+    // 最左侧是iter方法
+    let expr = syn::parse_quote!(some.iter().method_3().method_4());
+    assert!(is_iter(&expr));
+    eprintln!("--------------------------------");
+
+    let expr = syn::parse_quote!(some.method_5().iter().method_6());
+    assert!(!is_iter(&expr));
 }
 
 #[cfg(test)]

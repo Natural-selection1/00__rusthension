@@ -28,7 +28,7 @@ impl quote::ToTokens for LinkedListComprehension {
 
         let mut nested_code = match right_expr {
             None => quote! {
-                __rusthension_linked_list.push_back(#left_key);
+                __linked_list_comprehension.push_back(#left_key);
             },
             Some(MappingElse {
                 conditions,
@@ -41,9 +41,9 @@ impl quote::ToTokens for LinkedListComprehension {
 
                 quote! {
                     if #conditions {
-                        __rusthension_linked_list.push_back(#left_key);
+                        __linked_list_comprehension.push_back(#left_key);
                     } else {
-                        __rusthension_linked_list.push_back(#else_key);
+                        __linked_list_comprehension.push_back(#else_key);
                     }
                 }
             }
@@ -53,9 +53,9 @@ impl quote::ToTokens for LinkedListComprehension {
         nested_code = quote! {
             {
                 use ::std::collections::LinkedList;
-                let mut __rusthension_linked_list = LinkedList::new();
+                let mut __linked_list_comprehension = LinkedList::new();
                 #nested_code
-                __rusthension_linked_list
+                __linked_list_comprehension
             }
         };
 

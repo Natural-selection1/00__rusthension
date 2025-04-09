@@ -28,7 +28,7 @@ impl quote::ToTokens for BTreeMapComprehension {
 
         let mut nested_code = match right_expr {
             None => quote! {
-                __rusthension_b_tree_map.insert(#left_key, #left_value);
+                __b_tree_map_comprehension.insert(#left_key, #left_value);
             },
             Some(MappingElse {
                 conditions,
@@ -41,9 +41,9 @@ impl quote::ToTokens for BTreeMapComprehension {
 
                 quote! {
                     if #conditions {
-                        __rusthension_b_tree_map.insert(#left_key, #left_value);
+                        __b_tree_map_comprehension.insert(#left_key, #left_value);
                     } else {
-                        __rusthension_b_tree_map.insert(#else_key, #else_value);
+                        __b_tree_map_comprehension.insert(#else_key, #else_value);
                     }
                 }
             }
@@ -53,9 +53,9 @@ impl quote::ToTokens for BTreeMapComprehension {
         nested_code = quote! {
             {
                 use ::std::collections::BTreeMap;
-                let mut __rusthension_b_tree_map = BTreeMap::new();
+                let mut __b_tree_map_comprehension = BTreeMap::new();
                 #nested_code
-                __rusthension_b_tree_map
+                __b_tree_map_comprehension
             }
         };
 

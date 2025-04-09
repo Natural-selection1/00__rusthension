@@ -28,7 +28,7 @@ impl quote::ToTokens for VecDequeComprehension {
 
         let mut nested_code = match right_expr {
             None => quote! {
-                __rusthension_vec_deque.push_back(#left_key);
+                __vec_deque_comprehension.push_back(#left_key);
             },
             Some(MappingElse {
                 conditions,
@@ -41,9 +41,9 @@ impl quote::ToTokens for VecDequeComprehension {
 
                 quote! {
                     if #conditions {
-                        __rusthension_vec_deque.push_back(#left_key);
+                        __vec_deque_comprehension.push_back(#left_key);
                     } else {
-                        __rusthension_vec_deque.push_back(#else_key);
+                        __vec_deque_comprehension.push_back(#else_key);
                     }
                 }
             }
@@ -53,9 +53,9 @@ impl quote::ToTokens for VecDequeComprehension {
         nested_code = quote! {
             {
                 use ::std::collections::VecDeque;
-                let mut __rusthension_vec_deque = VecDeque::new();
+                let mut __vec_deque_comprehension = VecDeque::new();
                 #nested_code
-                __rusthension_vec_deque
+                __vec_deque_comprehension
             }
         };
 

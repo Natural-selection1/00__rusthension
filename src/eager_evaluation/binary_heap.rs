@@ -28,7 +28,7 @@ impl quote::ToTokens for BinaryHeapComprehension {
 
         let mut nested_code = match right_expr {
             None => quote! {
-                __rusthension_binary_heap.push(#left_key);
+                __binary_heap_comprehension.push(#left_key);
             },
             Some(MappingElse {
                 conditions,
@@ -37,9 +37,9 @@ impl quote::ToTokens for BinaryHeapComprehension {
             }) => {
                 quote! {
                     if #conditions {
-                        __rusthension_binary_heap.push(#left_key);
+                        __binary_heap_comprehension.push(#left_key);
                     } else {
-                        __rusthension_binary_heap.push(#else_key);
+                        __binary_heap_comprehension.push(#else_key);
                     }
                 }
             }
@@ -49,9 +49,9 @@ impl quote::ToTokens for BinaryHeapComprehension {
         nested_code = quote! {
             {
                 use ::std::collections::BinaryHeap;
-                let mut __rusthension_binary_heap = BinaryHeap::new();
+                let mut __binary_heap_comprehension = BinaryHeap::new();
                 #nested_code
-                __rusthension_binary_heap
+                __binary_heap_comprehension
             }
         };
 

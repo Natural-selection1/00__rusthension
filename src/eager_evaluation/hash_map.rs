@@ -28,7 +28,7 @@ impl quote::ToTokens for HashMapComprehension {
 
         let mut nested_code = match right_expr {
             None => quote! {
-                __rusthension_hash_map.insert(#left_key, #left_value);
+                __hash_map_comprehension.insert(#left_key, #left_value);
             },
             Some(MappingElse {
                 conditions,
@@ -41,9 +41,9 @@ impl quote::ToTokens for HashMapComprehension {
 
                 quote! {
                     if #conditions {
-                        __rusthension_hash_map.insert(#left_key, #left_value);
+                        __hash_map_comprehension.insert(#left_key, #left_value);
                     } else {
-                        __rusthension_hash_map.insert(#else_key, #else_value);
+                        __hash_map_comprehension.insert(#else_key, #else_value);
                     }
                 }
             }
@@ -53,9 +53,9 @@ impl quote::ToTokens for HashMapComprehension {
         nested_code = quote! {
             {
                 use ::std::collections::HashMap;
-                let mut __rusthension_hash_map = HashMap::new();
+                let mut __hash_map_comprehension = HashMap::new();
                 #nested_code
-                __rusthension_hash_map
+                __hash_map_comprehension
             }
         };
 
