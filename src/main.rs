@@ -1,3 +1,4 @@
+#![allow(unused)]
 use better_comprehension::{
     b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, iterator_ref, linked_list, vec_deque,
     vector,
@@ -19,6 +20,7 @@ fn main() {
     test_nested_comprehension();
     test_ownership_handling();
     test_option();
+    some_real_example_2();
 }
 
 fn test_vec() {
@@ -355,15 +357,103 @@ fn test_ref_iterator() {
 fn test_option() {
     let vec = [Some("1".to_string()), None, Some("3".to_string())];
 
-    let _result = vector![
+    let result = vector![
         x.clone()
         for x in vec.iter().flatten()
     ];
 
-    let mut result = Vec::new();
-    for x in vec.iter().flatten() {
-        result.push(x.clone());
-    }
+    let result = {
+        let mut result = Vec::new();
+        for x in vec.iter().flatten() {
+            result.push(x.clone());
+        }
+        result
+    };
 
     assert_eq!(result, vec!["1".to_string(), "3".to_string()]);
+}
+
+fn some_real_example_1() {
+    // 创建3x3矩阵
+    let matrix = vector![
+        vector![i * 3 + j + 1 for j in 0..3]
+        for i in 0..3
+    ];
+
+    // 矩阵转置
+    let transposed = vector![
+    vector![row[i]
+            for row in matrix.iter()]
+    for i in 0..3
+    ];
+    // matrix is alive
+    assert_eq!(matrix, vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]]);
+    assert_eq!(
+        transposed,
+        vec![vec![1, 4, 7], vec![2, 5, 8], vec![3, 6, 9]]
+    );
+}
+
+fn some_real_example_2() {
+    #[derive(Debug, PartialEq, Eq)]
+    struct Score {
+        subject: String,
+        score: u8,
+    }
+    #[derive(Debug, PartialEq, Eq)]
+    struct Student {
+        name: String,
+        age: u8,
+        scores: Vec<Score>,
+    }
+
+    let students_data = [
+        Student {
+            name: "Alice".to_string(),
+            age: 20,
+            scores: vec![
+                Score {
+                    subject: "Math".to_string(),
+                    score: 95,
+                },
+                Score {
+                    subject: "English".to_string(),
+                    score: 88,
+                },
+            ],
+        },
+        Student {
+            name: "Bob".to_string(),
+            age: 21,
+            scores: vec![
+                Score {
+                    subject: "Math".to_string(),
+                    score: 78,
+                },
+                Score {
+                    subject: "English".to_string(),
+                    score: 85,
+                },
+            ],
+        },
+    ];
+
+    // for student in &students_data {
+    //     for score in &student.scores {
+    //         if score.subject == "Math" {
+    //             println!("{}: {}", student.name, score.score);
+    //         }
+    //     }
+    // }
+
+    let math_scores: HashMap<&String, u8> = hash_map![
+        &student.name => score.score
+        for student in &students_data
+        for score in &student.scores if score.subject == "Math"
+    ];
+
+    assert_eq!(
+        math_scores,
+        HashMap::from([(&"Alice".to_string(), 95), (&"Bob".to_string(), 78)])
+    );
 }

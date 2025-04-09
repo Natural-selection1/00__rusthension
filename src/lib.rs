@@ -358,7 +358,7 @@ use syn::{ExprMethodCall, visit::Visit};
 impl<'ast> Visit<'ast> for IterMethodCallFinder {
     fn visit_expr_method_call(&mut self, node: &'ast ExprMethodCall) {
         match *node.receiver {
-            syn::Expr::Path(_) => {
+            syn::Expr::Path(_) | syn::Expr::Field(_) => {
                 if node.method == "iter" {
                     self.is_iter = true;
                 }

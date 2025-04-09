@@ -46,7 +46,7 @@ pub(crate) fn handle_nested_loops<'a>(
             Expr::MethodCall(_) => match crate::is_iter(iterable) {
                 true => quote! { #iterable },
                 _ => panic!(
-                    "please ensure the first method call is iter(): {:?}",
+                    "please ensure the first method call is iter(): \n{:#?}",
                     iterable
                 ),
             },
@@ -54,7 +54,7 @@ pub(crate) fn handle_nested_loops<'a>(
                 let iterable = &*expr.expr;
                 quote! { #iterable }
             }
-            _ => panic!("type is not supported: {:?}", iterable),
+            _ => panic!("type is not supported: \n{:#?}", iterable),
         };
 
         // 根据是否有if条件生成循环代码
