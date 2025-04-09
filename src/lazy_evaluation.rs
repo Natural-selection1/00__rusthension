@@ -78,7 +78,10 @@ impl quote::ToTokens for IteratorRef {
                     Expr::Path(_) => {
                         info_container.paths.push(iterable);
                     }
-                    _ => panic!("unreachable"),
+                    _ => panic!(
+                        "Only range (e.g. 1..10 or 2..=x where x is a number) and single identifier \
+                        (without any method calls) are supported for iterable comprehension"
+                    ),
                 }
 
                 let conditions = match if_clause {
