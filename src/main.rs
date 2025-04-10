@@ -3,38 +3,38 @@ use better_comprehension::{
     b_tree_map, b_tree_set, binary_heap, hash_map, hash_set, iterator_ref, linked_list, vec_deque,
     vector,
 };
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 
 fn main() {
     test_vec();
-    // test_binary_heap();
-    // test_linked_list();
-    // test_b_tree_set();
-    // test_b_tree_map();
-    // test_vec_deque();
-    // test_hash_set();
-    // test_hash_map();
-    // test_custom_type();
-    // test_ref_iterator();
-    // test_pattern_matching();
-    // test_nested_comprehension();
-    // test_ownership_handling();
-    // test_option();
-    // some_real_example_2();
+    test_binary_heap();
+    test_linked_list();
+    test_b_tree_set();
+    test_b_tree_map();
+    test_vec_deque();
+    test_hash_set();
+    test_hash_map();
+    test_custom_type();
+    test_ref_iterator();
+    test_pattern_matching();
+    test_nested_comprehension();
+    test_ownership_handling();
+    test_option();
+    some_real_example_2();
 }
 
 fn test_vec() {
     {
-        let vec_1 = vec!["123".to_string(), "456".to_string()];
+        let vec_1 = vec![Some("123".to_string()), Some("456".to_string())];
         let vec_2 = vec!["abc".to_string(), "def".to_string()];
         let vec = vector![
             {
-                let some = x.clone() + y;
+                let some = x_1.clone() + y;
                 println!("{}", some);
 
                 (x.clone(), y.clone())
             }
-            for x in vec_1 if x.contains("1")
+            for x in vec_1 if let Some(x_1) = x
             for y in vec_2 if y.contains("d")
         ];
     }
@@ -506,4 +506,29 @@ fn some_real_example_2() {
             (&"Bob".to_string(), vec!["English"])
         ])
     );
+}
+
+#[test]
+fn some() {
+use better_comprehension::iterator_ref;
+let vec_1 = ["123".to_string(),
+             "456".to_string(),
+             "789".to_string()];
+let vec_2 = ["ABC".to_string(),
+             "DEF".to_string(),
+             "GHI".to_string()];
+
+let mut result3 = iterator_ref![
+    (x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
+    for x in vec_1 if x.contains("1") || x.contains("7")
+    for i in 1..=2
+    for y in vec_2 if y.contains("D") || x.contains("3")];
+
+// still alive
+println!("{:?}", vec_1);
+println!("{:?}", vec_2);
+
+for _ in 0..=9 {
+    println!("{:?}", result3.next());
+}
 }
