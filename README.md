@@ -8,53 +8,56 @@ This library aims to be a good alternative to all comprehension libraries,
 for the libraries you encounter when searching "comprehension" on crate.io,
 we have already done:
 Fully covered libraries:
-    * [comprehension](https://crates.io/crates/comprehension)
-    * [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
-    * [iter-comprehensions](https://crates.io/crates/iter-comprehensions)
-    * [cute](https://crates.io/crates/cute)
+* [comprehension](https://crates.io/crates/comprehension)
+* [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
+* [iter-comprehensions](https://crates.io/crates/iter-comprehensions)
+* [cute](https://crates.io/crates/cute)
 
 Partially covered libraries:
 * [list_comprehension_macro](https://crates.io/crates/list_comprehension_macro)
-  * Does not provide a unified macro that distinguishes by mapping expression (like real Python comprehensions)
+* Does not provide a unified macro that distinguishes by mapping expression (like real Python comprehensions)
+
     (No plans to support this, as this library already provides all collection types in the Rust standard library)
 
-  * Does not support while loop
+* Does not support while loop
 
 * [list_comprehension](https://crates.io/crates/list_comprehension)
-  * Does not support let-else variable binding
+* Does not support let-else variable binding
+
     (No plans to support this, as it overly complicates the for-in part, and these things can be completely solved in the mapping return block)
 
-# Usage
-
-## Collection Comprehensions
+# Collection Comprehensions
 
 You can completely treat collection comprehension macros as sugar for `for loop`
 (In fact, these macros are implemented using `for loop`)
 So you'll see many familiar syntaxes
 However, they will be more ergonomic and easier to read and use
 
-### Simple Example
+# Simple Example
 ```rust
 use better_comprehension::vector;
 let vec_1 = vec!["AB".to_string(), "CD".to_string()];
 let vec_2 = vec!["12".to_string(), "34".to_string()];
 
 
-// Ownership consuming iteration (just pass the single identifier)
+// Ownership consuming iteration
+// (just pass the single identifier)
 // x's type is &String
 let vec: Vec<String> = vector![x.clone() for x in vec_1];
 // println!("{:?}", vec_1); // borrow of moved value
 assert_eq!(vec, vec!["AB".to_string(), "CD".to_string()]);
 
-// Ownership preserving iteration (pass &collection or collection.iter().other_method())
+// Ownership preserving iteration
+// (pass &collection or collection.iter().other_method())
 // x's type is &String
 let vec: Vec<String> = vector![x.clone() for x in vec_2.iter()];
-// let vec: Vec<String> = vector![x.clone() for x in &vec_2]; // equivalent writing
+// equivalent writing
+// let vec: Vec<String> = vector![x.clone() for x in &vec_2];
 println!("{:?}", vec_2); // vec_2 is alive
 assert_eq!(vec, vec!["12".to_string(), "34".to_string()]);
 ```
 
-### if in collection
+# if in comprehension
 
 `for` pattern `in` collection `if` ... will be translated to
 ```rust
@@ -65,14 +68,17 @@ for pattern in collection {
 }
 ```
 
-#### if conditions as filtering conditions
+## if conditions as filtering conditions
 Where conditions is any expression that returns a bool
 Only when the expression returns true, it will be mapped
 ```rust
 use better_comprehension::linked_list;
 use std::collections::LinkedList;
 // i's type is i32
-let linked_list = linked_list![ i*2 for i in 1..=3 if i != 2 ];
+let linked_list = linked_list![
+    i*2
+    for i in 1..=3 if i != 2
+];
 assert_eq!(linked_list, LinkedList::from([2, 6]));
 ```
 
@@ -81,22 +87,29 @@ use better_comprehension::linked_list;
 use std::collections::LinkedList;
 let judge_function = |i: i32| i != 2;
 // i's type is i32
-let linked_list = linked_list![ i*2 for i in 1..=3 if judge_function(i) ];
+let linked_list = linked_list![
+    i*2
+    for i in 1..=3 if judge_function(i)
+];
 assert_eq!(linked_list, LinkedList::from([2, 6]));
 ```
 
-#### if let expression
+## if let expression
 ```rust
 use better_comprehension::vector;
-let vec_1 = vec![Some("123".to_string()), None, Some("456".to_string())];
+let vec_1 = vec![Some("123".to_string()),
+                None,
+                Some("456".to_string())];
 let vec = vector![
     __x__.clone()
     for x in vec_1 if let Some(__x__) = x
 ];
-assert_eq!(vec, vec!["123".to_string(), "456".to_string()]);
+assert_eq!(vec, vec!["123".to_string(),
+                    "456".to_string()]
+);
 ```
 
-#### Return different values based on conditions
+# Return different values based on conditions
 ```rust
 use better_comprehension::b_tree_set;
 use std::collections::BTreeSet;
@@ -107,7 +120,7 @@ let b_tree_set = b_tree_set!{
 assert_eq!(b_tree_set, BTreeSet::from([1, 13]));
 ```
 
-### Use pattern matching
+# Use pattern matching
 ```rust
 use better_comprehension::vec_deque;
 use std::collections::VecDeque;
@@ -118,7 +131,7 @@ struct Person {
 }
 
 let people = [Person { name: "Joe".to_string(), age: 20 },
-              Person { name: "Bob".to_string(), age: 25 }];
+            Person { name: "Bob".to_string(), age: 25 }];
 
 // name's type is &String
 let vec_deque: VecDeque<String> = vec_deque![
@@ -130,7 +143,7 @@ println!("{:?}", people); // people is alive
 assert_eq!(vec_deque, VecDeque::from(["Bob".to_string()]));
 ```
 
-### Nested Comprehensions
+# Nested Comprehensions
 Like Python's comprehensions, this library's for loop is read from top to bottom.
 
 ```rust
@@ -151,10 +164,10 @@ let vec = vector![
     for top in 1..=3 if top != 2
     for bottom in 4..=6 if bottom+top != 4];
 assert_eq!(vec, vec![(1, 4), (1, 5), (1, 6),
-                     (3, 4), (3, 5), (3, 6)]);
+                    (3, 4), (3, 5), (3, 6)]);
 ```
 
-### Execute code in block before returning
+# Execute code in block before returning
 This is a very powerful feature, you can execute any code before returning but it will reduce readability, please use it with caution
 ```rust
 use better_comprehension::vector;
@@ -185,7 +198,7 @@ assert_eq!(
 );
 ```
 
-### description of ergonomic
+# description of ergonomic
 Please note, in Rust, for loop consumes ownership.
 So usually, for multi-layer loops, if you want the original collection to be consumed, you should write it like this:
 ```rust
@@ -228,6 +241,7 @@ In this library, you don't need to do this, the macros will automatically handle
 You only need to do two things:
 1. For the collection you want to keep ownership, add `.iter()` or use `&`
 2. Directly pass the variable name of the collection you want to consume
+
 The rest will be automatically handled in the macro.
 ```rust
 use better_comprehension::vector;
@@ -246,7 +260,7 @@ println!("{:?}", vec_2); // work well
 // println!("{:?}", vec_3); // borrow of moved value
 ```
 
-### Key-value collection types
+# Key-value collection types
 Also, this library supports key-value collection types, HashMap, BTreeMap
 And supports three key-value separators "=>" ":" ","
 
@@ -280,7 +294,7 @@ assert_eq!(
 );
 ```
 
-### Some details
+# Some details
 vector! :       push() to add elements
 
 binary_heap! :  push() to add elements
@@ -297,7 +311,7 @@ b_tree_map! :   insert() to add key-value pairs
 
 b_tree_set! :   insert() to add elements
 
-## Iterator Comprehensions
+# Iterator Comprehensions
 This library also supports iterator comprehensions, but as the author, I do not recommend using them, the reasons are as follows:
 1. In the collection comprehension, we also use references to derive, as long as we do not consume the original collection, we can achieve the same thing
 2. The cost of getting a reference copy is not large
@@ -311,11 +325,11 @@ However, to ensure the correctness of the iterator comprehension, only two itera
 ```rust
 use better_comprehension::iterator_ref;
 let vec_1 = ["123".to_string(),
-             "456".to_string(),
-             "789".to_string()];
+            "456".to_string(),
+            "789".to_string()];
 let vec_2 = ["ABC".to_string(),
-             "DEF".to_string(),
-             "GHI".to_string()];
+            "DEF".to_string(),
+            "GHI".to_string()];
 
 let mut result3 = iterator_ref![
     (x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
@@ -347,11 +361,11 @@ None
 The above writing is equivalent to the following writing
 ```rust
 let vec_1 = ["123".to_string(),
-             "456".to_string(),
-             "789".to_string()];
+            "456".to_string(),
+            "789".to_string()];
 let vec_2 = ["ABC".to_string(),
-             "DEF".to_string(),
-             "GHI".to_string()];
+            "DEF".to_string(),
+            "GHI".to_string()];
 
 let mut result3 = {
     let vec_2 = vec_2.iter().collect::<Vec<_>>();
@@ -385,14 +399,14 @@ This implementation makes the following features in collection comprehension una
 
 # Differences
 * Ownership consumption:
-  * Collection comprehension:
+* Collection comprehension:
     * Using & or .iter() does not consume ownership
     * Directly passing the variable name consumes ownership
-  * Iterator comprehension:
+* Iterator comprehension:
     * Always does not consume ownership, but only allows passing in a single identifier and range expression that does not follow any method calls
 
 * Differences in features:
-  * if let expression
+* if let expression
     * Collection comprehension: supported
     * Iterator comprehension: not supported
 
@@ -420,8 +434,8 @@ assert_eq!(matrix, vec![vec![1, 2, 3],
 assert_eq!(
     transposed,
     vec![vec![1, 4, 7],
-         vec![2, 5, 8],
-         vec![3, 6, 9]]
+        vec![2, 5, 8],
+        vec![3, 6, 9]]
 );
 ```
 
@@ -495,7 +509,7 @@ let math_scores: HashMap<&String, u8> = hash_map![
 assert_eq!(
     math_scores,
     HashMap::from([(&"Alice".to_string(), 95),
-                   (&"Bob".to_string(), 78)]));
+                (&"Bob".to_string(), 78)]));
 
 // use for loop
 let high_scores = {
