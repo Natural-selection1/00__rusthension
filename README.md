@@ -4,6 +4,27 @@
 Collection comprehension and Iterator comprehension in Rust.
 And it provides a better experience in Rust.
 
+This library aims to be a good alternative to all comprehension libraries,
+for the libraries you encounter when searching "comprehension" on crate.io,
+we have already done:
+* [comprehension](https://crates.io/crates/comprehension)
+  * Not supported let variable binding
+  * All other features are covered
+* [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
+  * All features are covered
+* [list_comprehension_macro](https://crates.io/crates/list_comprehension_macro)
+  * Not provided a unified macro, using mapping expression to distinguish
+    (like the real python comprehension)
+  * Not supported while loop
+  * All other features are covered
+* [iter-comprehensions](https://crates.io/crates/iter-comprehensions)
+  * All features are covered
+* [list_comprehension](https://crates.io/crates/list_comprehension)
+  * Not supported let else variable binding
+  * All other features are covered
+* [cute](https://crates.io/crates/cute)
+  * All features are covered
+
 # Usage
 
 The syntax is derived from [Python's comprehension](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
@@ -45,6 +66,25 @@ let linked_list = linked_list![ i*2 for i in 1..=3 if i != 2 ];
 assert_eq!(linked_list, LinkedList::from([2, 6]));
 ```
 ---
+
+use block to execute code before returning
+```rust
+use better_comprehension::vector;
+let vec_1 = vec!["123".to_string(), "456".to_string()];
+let vec_2 = vec!["abc".to_string(), "def".to_string()];
+let vec = vector![
+    {
+        let some = x.clone() + y;
+        println!("{}", some);
+
+        (x.clone(), y.clone())
+    }
+    for x in vec_1 if x.contains("1")
+    for y in vec_2 if y.contains("d")
+];
+```
+---
+
 return different values based on conditions
 ```rust
 use better_comprehension::b_tree_set;

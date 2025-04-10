@@ -7,34 +7,52 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDequ
 
 fn main() {
     test_vec();
-    test_binary_heap();
-    test_linked_list();
-    test_b_tree_set();
-    test_b_tree_map();
-    test_vec_deque();
-    test_hash_set();
-    test_hash_map();
-    test_custom_type();
-    test_ref_iterator();
-    test_pattern_matching();
-    test_nested_comprehension();
-    test_ownership_handling();
-    test_option();
-    some_real_example_2();
+    // test_binary_heap();
+    // test_linked_list();
+    // test_b_tree_set();
+    // test_b_tree_map();
+    // test_vec_deque();
+    // test_hash_set();
+    // test_hash_map();
+    // test_custom_type();
+    // test_ref_iterator();
+    // test_pattern_matching();
+    // test_nested_comprehension();
+    // test_ownership_handling();
+    // test_option();
+    // some_real_example_2();
 }
 
 fn test_vec() {
+    {
+        let vec_1 = vec!["123".to_string(), "456".to_string()];
+        let vec_2 = vec!["abc".to_string(), "def".to_string()];
+        let vec = vector![
+            {
+                let some = x.clone() + y;
+                println!("{}", some);
+
+                (x.clone(), y.clone())
+            }
+            for x in vec_1 if x.contains("1")
+            for y in vec_2 if y.contains("d")
+        ];
+    }
+
     // 简单示例
     {
         let vec_1 = vec!["AB".to_string(), "CD".to_string()];
-        let vec: Vec<String> = vector![x.clone() for x in vec_1];
+        let vec: Vec<String> = vector![{println!("{}", x);
+                                        x.clone()}
+                                        for x in vec_1];
         assert_eq!(vec, vec!["AB".to_string(), "CD".to_string()]);
     }
 
     // 条件返回不同值
     {
         let result = vector![
-            [x, y] if x > y else [y, x]
+            {println!("{}", x); [x, y]} if x > y
+            else {println!("{}", y); [y, x]}
             for y in 0..7 if y % 3 == 0
             for x in (0..y+2) if x % 2 == 0
         ];

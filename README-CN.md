@@ -2,6 +2,24 @@
 
 在rust中的集合推导式和迭代器推导式, 提供更好的Rust使用体验
 
+本库旨在成为所有推导式库的良好替代品, 对于你在crate.io中搜索"comprehension"时遇到的库, 我们已经做到了 :
+* [comprehension](https://crates.io/crates/comprehension)
+  * 暂未支持let变量绑定
+  * 其余功能本库完全覆盖
+* [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
+  * 所有功能本库完全覆盖
+* [list_comprehension_macro](https://crates.io/crates/list_comprehension_macro)
+  * 暂未提供一个统一的宏, 通过mapping表达式进行区分(就像真正的python推导式那样)
+  * 暂未支持while loop
+  * 其余功能本库完全覆盖
+* [iter-comprehensions](https://crates.io/crates/iter-comprehensions)
+  * 所有功能本库完全覆盖
+* [list_comprehension](https://crates.io/crates/list_comprehension)
+  * 暂未支持let else变量绑定
+  * 其余功能本库完全覆盖
+* [cute](https://crates.io/crates/cute)
+  * 所有功能本库完全覆盖
+
 # 用法
 语法源自 [python推导式](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
 
@@ -42,6 +60,24 @@ use better_comprehension::linked_list;
 use std::collections::LinkedList;
 let linked_list = linked_list![ i*2 for i in 1..=3 if i != 2 ];
 assert_eq!(linked_list, LinkedList::from([2, 6]));
+```
+---
+
+使用块在返回前执行代码
+```rust
+use better_comprehension::vector;
+let vec_1 = vec!["123".to_string(), "456".to_string()];
+let vec_2 = vec!["abc".to_string(), "def".to_string()];
+let vec = vector![
+    {
+        let some = x.clone() + y;
+        println!("{}", some);
+
+        (x.clone(), y.clone())
+    }
+    for x in vec_1 if x.contains("1")
+    for y in vec_2 if y.contains("d")
+];
 ```
 ---
 

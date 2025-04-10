@@ -4,6 +4,29 @@
 //! Collection comprehension and Iterator comprehension in Rust.
 //! And it provides a better experience in Rust.
 //!
+//! This library aims to be a good alternative to all comprehension libraries,
+//! for the libraries you encounter when searching "comprehension" on crate.io,
+//! we have already done:
+//! * [comprehension](https://crates.io/crates/comprehension)
+//!   * Not supported let variable binding
+//!   * All other features are covered
+//! * [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
+//!   * All features are covered
+//! * [list_comprehension_macro](https://crates.io/crates/list_comprehension_macro)
+//!   * Not provided a unified macro, using mapping expression to distinguish
+//!
+//!     (like the real python comprehension)
+//!   * Not supported while loop
+//!   * All other features are covered
+//! * [iter-comprehensions](https://crates.io/crates/iter-comprehensions)
+//!   * All features are covered
+//! * [list_comprehension](https://crates.io/crates/list_comprehension)
+//!   * Not supported let else variable binding
+//!   * All other features are covered
+//! * [cute](https://crates.io/crates/cute)
+//!   * All features are covered
+//!
+//!
 //! # Usage
 //!
 //! The syntax is derived from [Python's comprehension](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
@@ -12,6 +35,7 @@
 //! in the Rust standard library and an Iterator based on references.
 //!
 //! ---
+//!
 //! simple example
 //! ```rust
 //! use better_comprehension::vector;
@@ -20,6 +44,7 @@
 //! assert_eq!(vec, vec!["AB".to_string(), "CD".to_string()]);
 //! ```
 //! ---
+//!
 //! You can also use patterns in it
 //! ```rust
 //! use better_comprehension::vec_deque;
@@ -37,6 +62,7 @@
 //!                            "Bob".to_string()]));
 //! ```
 //! ---
+//!
 //! filtering values before comprehension
 //! ```rust
 //! use better_comprehension::linked_list;
@@ -45,6 +71,25 @@
 //! assert_eq!(linked_list, LinkedList::from([2, 6]));
 //! ```
 //! ---
+//!
+//! use block to execute code before returning
+//!```rust
+//!use better_comprehension::vector;
+//!let vec_1 = vec!["123".to_string(), "456".to_string()];
+//!let vec_2 = vec!["abc".to_string(), "def".to_string()];
+//!let vec = vector![
+//!    {
+//!        let some = x.clone() + y;
+//!        println!("{}", some);
+//!
+//!        (x.clone(), y.clone())
+//!    }
+//!    for x in vec_1 if x.contains("1")
+//!    for y in vec_2 if y.contains("d")
+//!];
+//!```
+//! ---
+//!
 //! return different values based on conditions
 //! ```rust
 //! use better_comprehension::b_tree_set;
@@ -56,6 +101,7 @@
 //! assert_eq!(b_tree_set, BTreeSet::from([1, 13]));
 //! ```
 //! ---
+//!
 //! nested comprehension
 //! ```rust
 //! use better_comprehension::binary_heap;
@@ -67,6 +113,7 @@
 //! assert_eq!(binary_heap.into_sorted_vec(), vec![1, 1, 3, 13]);
 //! ```
 //! ---
+//!
 //! the reading order of the for loop in this library is from top to bottom,
 //! just like Python's comprehension.
 //! ```rust
@@ -123,6 +170,7 @@
 //! // println!("{:?}", vec_3); // borrow of moved value
 //! ```
 //! ---
+//!
 //! But in this library, you don't need to do this,
 //!
 //! the provided macros will automatically handle these problems for you.
@@ -148,6 +196,7 @@
 //! // println!("{:?}", vec_3); // borrow of moved value
 //! ```
 //! ---
+//!
 //! This library also supports key-value collection types, HashMap, BTreeMap
 //! ```rust
 //! use better_comprehension::hash_map;
@@ -174,6 +223,7 @@
 //! );
 //! ```
 //! ---
+//!
 //! Iterator comprehension is also supported,
 //! but unlike the collection comprehension above,
 //!
