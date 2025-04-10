@@ -60,7 +60,7 @@
 //! # if in comprehension
 //!
 //! `for` pattern `in` collection `if` ... will be translated to
-//! ```rust
+//! ```ignore
 //! for pattern in collection {
 //!     if ... {
 //!
