@@ -5,6 +5,7 @@
 本库旨在成为所有推导式库的良好替代品, 对于你在crate.io中搜索"comprehension"时遇到的库, 我们已经做到了 :
 * [comprehension](https://crates.io/crates/comprehension)
   * 暂未支持let变量绑定
+    * (在2.0.0版本中部分支持, 可以在返回前使用let变量绑定)
   * 其余功能本库完全覆盖
 * [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
   * 所有功能本库完全覆盖

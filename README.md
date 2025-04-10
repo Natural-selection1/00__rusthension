@@ -9,6 +9,8 @@ for the libraries you encounter when searching "comprehension" on crate.io,
 we have already done:
 * [comprehension](https://crates.io/crates/comprehension)
   * Not supported let variable binding
+    * (In the 2.0.0 version, it partially supports let variable binding,
+      which can be used in the block return statement)
   * All other features are covered
 * [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
   * All features are covered
