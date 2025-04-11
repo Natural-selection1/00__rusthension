@@ -298,6 +298,12 @@ let vec = vector![
 println!("{:?}", vec_2); // work well
 // println!("{:?}", vec_3); // borrow of moved value
 ```
+## 请注意:
+* [使用 let _ = 或 let () = 执行任意代码](#使用-let-_--或-let---执行任意代码)
+* [使用块在返回前执行代码](#使用块在返回前执行代码)
+
+中编写的代码将不会享受简写规则, 他们是完完全全的rust代码
+
 
 # 键值对容器类型
 同时, 该库还支持键值对容器类型, HashMap, BTreeMap

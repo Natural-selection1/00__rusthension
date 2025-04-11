@@ -153,7 +153,7 @@ let vec = vector![
 assert_eq!(vec, vec![1, 2, 3, 3, 3]);
 ```
 
-## use let _ = or let () = to execute arbitrary code
+## use let _ = or let () = to execute code
 This is a very powerful feature, please use it with caution
 ```rust
 use better_comprehension::vector;
@@ -309,6 +309,14 @@ let vec = vector![
 println!("{:?}", vec_2); // work well
 // println!("{:?}", vec_3); // borrow of moved value
 ```
+
+## Pay attention
+The code written in
+* [use let _ = or let () = to execute code](#use-let-_--or-let---to-execute-code)
+* [Execute code in block before returning](#execute-code-in-block-before-returning)
+
+will not enjoy the ergonomic rules, they are complete rust code
+
 
 # Key-value collection types
 Also, this library supports key-value collection types, HashMap, BTreeMap
