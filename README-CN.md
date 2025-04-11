@@ -31,16 +31,16 @@
 
 以及基于引用的迭代器推导式宏
 
-# 用法
 
-## 集合推导式
+
+# 集合推导式
 
 你可以完全将集合推导式宏视为 `for` 循环的语法糖
 (事实上, 这些宏就是使用 `for` 循环实现的)
 所以你可以看到很多很熟悉的语法
 不过, 他们将更加符合人体工程学, 更加便于阅读和使用
 
-### 简单示例
+# 简单示例
 ```rust
 use better_comprehension::vector;
 let vec_1 = vec!["AB".to_string(), "CD".to_string()];
@@ -61,7 +61,7 @@ println!("{:?}", vec_2); // vec_2还活着
 assert_eq!(vec, vec!["12".to_string(), "34".to_string()]);
 ```
 
-### 集合推导中的 if
+# 集合推导中的 if
 
 `for` pattern `in` collection `if` ... 将被完全翻译为
 ```rust
@@ -72,7 +72,7 @@ for pattern in collection {
 }
 ```
 
-#### if conditions 作为过滤条件
+## if conditions 作为过滤条件
 其中 conditions 为任意值为bool的表达式
 只有当表达式返回true时, 才会将对其进行推导映射
 ```rust
@@ -92,7 +92,7 @@ let linked_list = linked_list![ i*2 for i in 1..=3 if judge_function(i) ];
 assert_eq!(linked_list, LinkedList::from([2, 6]));
 ```
 
-#### if let 表达式
+## if let 表达式
 ```rust
 use better_comprehension::vector;
 let vec_1 = vec![Some("123".to_string()), None, Some("456".to_string())];
@@ -103,7 +103,7 @@ let vec = vector![
 assert_eq!(vec, vec!["123".to_string(), "456".to_string()]);
 ```
 
-#### 根据条件返回不同的值
+# 根据条件返回不同的值
 ```rust
 use better_comprehension::b_tree_set;
 use std::collections::BTreeSet;
@@ -114,7 +114,55 @@ let b_tree_set = b_tree_set!{
 assert_eq!(b_tree_set, BTreeSet::from([1, 13]));
 ```
 
-### 使用模式匹配
+# let 表达式
+let 表达式所属的范围是它上方最近的 for in 表达式, 且受到if表达式筛选后的结果(如果有的话), 可以有多个let表达式, 他们的阅读顺序是从上到下的.
+完全等价于
+```ignore
+for pattern in collection {
+    if ... { // 如果有的话
+    let ...;
+    let ...;
+
+    }
+}
+```
+
+## 使用let表达式绑定变量
+```rust
+use better_comprehension::vector;
+let vec = vector![
+    b
+    for x in 1..=3 if x != 2
+    let __x__ = x*2
+    for y in 4..=6 if y+__x__ != 7
+    let z = __x__ + y
+    let a = z*2
+    let b = match z {
+        5..=6 => 1,
+        7..=8 => 2,
+        _ => 3
+    }
+];
+assert_eq!(vec, vec![1, 2, 3, 3, 3]);
+```
+
+## 使用 let _ = 或 let () = 执行任意代码
+这是一个极其强大的功能, 请谨慎使用
+```rust
+use better_comprehension::vector;
+let vec = vector![
+    x
+    for x in 1..=3
+    let _ = println!("{}", x)
+    let () = {
+        for i in 1..=3 {
+            println!("{}", i);
+        }
+    }
+];
+```
+
+# 使用模式匹配
 ```rust
 use better_comprehension::vec_deque;
 use std::collections::VecDeque;
@@ -137,7 +185,7 @@ println!("{:?}", people); // people还活着
 assert_eq!(vec_deque, VecDeque::from(["Bob".to_string()]));
 ```
 
-### 嵌套推导式
+# 嵌套推导式
 和python的推导式一样, 本库的for循环是从上到下读取的.
 
 ```rust
@@ -160,8 +208,9 @@ assert_eq!(vec, vec![(1, 4), (1, 5), (1, 6),
                      (3, 4), (3, 5), (3, 6)]);
 ```
 
-### 使用块在返回前执行代码
+# 使用块在返回前执行代码
 这是一个极其强大的功能, 你可以在返回前执行任意代码但会降低可读性, 请谨慎使用
+如果可以, 更推荐使用在最后一个 `for in` 后 `let _ =` 或 `let () =` 执行代码来代替
 ```rust
 use better_comprehension::vector;
 let vec_1 = vec!["123".to_string(), "456".to_string()];
@@ -191,7 +240,7 @@ assert_eq!(
 );
 ```
 
-### 简写说明
+# 简写说明
 请你注意,由于在rust中, for loop 是消耗所有权的.
 所以通常来说, 对于多层循环, 如果你希望原容器被消耗, 你应该写成如下这样:
 ```rust
@@ -251,7 +300,7 @@ println!("{:?}", vec_2); // work well
 // println!("{:?}", vec_3); // borrow of moved value
 ```
 
-### 键值对容器类型
+# 键值对容器类型
 同时, 该库还支持键值对容器类型, HashMap, BTreeMap
 并且支持三种键值对分隔符 "=>" ":" ","
 
@@ -285,7 +334,7 @@ assert_eq!(
 );
 ```
 
-### 一些细节
+# 一些细节
 vector! :       push() 添加元素
 
 binary_heap! :  push() 添加元素
@@ -302,7 +351,7 @@ b_tree_map! :   insert() 添加键值对
 
 b_tree_set! :   insert() 添加元素
 
-## 迭代器推导式
+# 迭代器推导式
 该库也支持迭代器推导式, 但作为作者我并不推荐使用, 原因如下:
 1. 在集合推导式中, 我们也是通过引用进行推导的, 只要我们不消耗原集合, 那么就能做到相同的事情
 2. 得到引用的副本的代价并不大
@@ -407,16 +456,39 @@ let mut result3 = {
 use better_comprehension::vector;
 use std::collections::{HashMap, BTreeMap};
 // 创建3x3矩阵
+
+// python-like
 let matrix = vector![
     vector![i * 3 + j + 1 for j in 0..3]
     for i in 0..3
 ];
 
+// 更推荐的写法
+let matrix = vector![
+    row
+    for i in 0..3
+    let row = vector![
+        i * 3 + j + 1
+        for j in 0..3
+    ]
+];
+
 // 矩阵转置
+// python-like
 let transposed = vector![
 vector![row[i]
         for row in matrix.iter()]
 for i in 0..3
+];
+
+// 更推荐的写法
+let transposed = vector![
+    row
+    for i in 0..3
+    let row = vector![
+        row[i]
+        for row in matrix.iter()
+    ]
 ];
 // matrix is alive
 assert_eq!(matrix, vec![vec![1, 2, 3],
@@ -503,8 +575,8 @@ assert_eq!(
                    (&"Bob".to_string(), 78)]));
 
 // use for loop
-let high_scores = {
-    let mut high_scores = BTreeMap::new();
+let name_high_scores_map = {
+    let mut name_high_scores_map = BTreeMap::new();
     for student in &students_data {
         let mut subjects = Vec::new();
         for score in &student.scores {
@@ -512,20 +584,30 @@ let high_scores = {
                 subjects.push(score.subject);
             }
         }
-        high_scores.insert(&student.name, subjects);
+        name_high_scores_map.insert(&student.name, subjects);
     }
-    high_scores
+    name_high_scores_map
 };
 // ↓ 等价于 ↓
-// use comprehension!
-let high_scores = b_tree_map![
+// use comprehension! (python-like)
+let name_high_scores_map = b_tree_map![
     &student.name =>
         vector![score.subject for score in &student.scores if score.score >= 85]
     for student in &students_data
 ];
+// ↓ 等价于 ↓
+// 更推荐的写法
+let name_high_scores_map = b_tree_map![
+    &student.name => subjects
+    for student in &students_data
+    let subjects = vector![
+        score.subject
+        for score in &student.scores if score.score >= 85
+    ]
+];
 
 assert_eq!(
-    high_scores,
+    name_high_scores_map,
     BTreeMap::from([
         (&"Alice".to_string(), vec!["Math", "English"]),
         (&"Bob".to_string(), vec!["English"])

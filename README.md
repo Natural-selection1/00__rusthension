@@ -15,14 +15,14 @@ Fully covered libraries:
 
 Partially covered libraries:
 * [list_comprehension_macro](https://crates.io/crates/list_comprehension_macro)
-* Does not provide a unified macro that distinguishes by mapping expression (like real Python comprehensions)
+  * Does not provide a unified macro that distinguishes by mapping expression (like real Python comprehensions)
 
     (No plans to support this, as this library already provides all collection types in the Rust standard library)
 
-* Does not support while loop
+  * Does not support while loop
 
 * [list_comprehension](https://crates.io/crates/list_comprehension)
-* Does not support let-else variable binding
+  * Does not support let-else variable binding
 
     (No plans to support this, as it overly complicates the for-in part, and these things can be completely solved in the mapping return block)
 
@@ -60,7 +60,7 @@ assert_eq!(vec, vec!["12".to_string(), "34".to_string()]);
 # if in comprehension
 
 `for` pattern `in` collection `if` ... will be translated to
-```rust
+```ignore
 for pattern in collection {
     if ... {
 
@@ -98,14 +98,14 @@ assert_eq!(linked_list, LinkedList::from([2, 6]));
 ```rust
 use better_comprehension::vector;
 let vec_1 = vec![Some("123".to_string()),
-                None,
-                Some("456".to_string())];
+                 None,
+                 Some("456".to_string())];
 let vec = vector![
     __x__.clone()
     for x in vec_1 if let Some(__x__) = x
 ];
 assert_eq!(vec, vec!["123".to_string(),
-                    "456".to_string()]
+                     "456".to_string()]
 );
 ```
 
@@ -120,6 +120,57 @@ let b_tree_set = b_tree_set!{
 assert_eq!(b_tree_set, BTreeSet::from([1, 13]));
 ```
 
+
+# let expression
+The scope of a let expression is the nearest for in expression above it, and it is affected by the filtering result of the if expression (if any). There can be multiple let expressions, and they are read from top to bottom.
+
+Equivalent to
+```ignore
+for pattern in collection {
+    // if there is an if expression
+    if ... {
+    let ...;
+    let ...;
+
+    }
+}
+```
+
+## use let expression to bind variables
+```rust
+use better_comprehension::vector;
+let vec = vector![
+    b
+    for x in 1..=3 if x != 2
+    let __x__ = x*2
+    for y in 4..=6 if y+__x__ != 7
+    let z = __x__ + y
+    let a = z*2
+    let b = match z {
+        5..=6 => 1,
+        7..=8 => 2,
+        _ => 3
+    }
+];
+assert_eq!(vec, vec![1, 2, 3, 3, 3]);
+```
+
+## use let _ = or let () = to execute arbitrary code
+This is a very powerful feature, please use it with caution
+```rust
+use better_comprehension::vector;
+let vec = vector![
+    x
+    for x in 1..=3
+    let _ = println!("{}", x)
+    let () = {
+        for i in 1..=3 {
+            println!("{}", i);
+        }
+    }
+];
+```
+
 # Use pattern matching
 ```rust
 use better_comprehension::vec_deque;
@@ -131,7 +182,7 @@ struct Person {
 }
 
 let people = [Person { name: "Joe".to_string(), age: 20 },
-            Person { name: "Bob".to_string(), age: 25 }];
+              Person { name: "Bob".to_string(), age: 25 }];
 
 // name's type is &String
 let vec_deque: VecDeque<String> = vec_deque![
@@ -164,11 +215,12 @@ let vec = vector![
     for top in 1..=3 if top != 2
     for bottom in 4..=6 if bottom+top != 4];
 assert_eq!(vec, vec![(1, 4), (1, 5), (1, 6),
-                    (3, 4), (3, 5), (3, 6)]);
+                     (3, 4), (3, 5), (3, 6)]);
 ```
 
 # Execute code in block before returning
 This is a very powerful feature, you can execute any code before returning but it will reduce readability, please use it with caution
+If possible, it is recommended to use `let _ =` or `let () =` to execute code after the last `for in` instead
 ```rust
 use better_comprehension::vector;
 let vec_1 = vec!["123".to_string(), "456".to_string()];
@@ -325,11 +377,11 @@ However, to ensure the correctness of the iterator comprehension, only two itera
 ```rust
 use better_comprehension::iterator_ref;
 let vec_1 = ["123".to_string(),
-            "456".to_string(),
-            "789".to_string()];
+             "456".to_string(),
+             "789".to_string()];
 let vec_2 = ["ABC".to_string(),
-            "DEF".to_string(),
-            "GHI".to_string()];
+             "DEF".to_string(),
+             "GHI".to_string()];
 
 let mut result3 = iterator_ref![
     (x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
@@ -361,11 +413,11 @@ None
 The above writing is equivalent to the following writing
 ```rust
 let vec_1 = ["123".to_string(),
-            "456".to_string(),
-            "789".to_string()];
+             "456".to_string(),
+             "789".to_string()];
 let vec_2 = ["ABC".to_string(),
-            "DEF".to_string(),
-            "GHI".to_string()];
+             "DEF".to_string(),
+             "GHI".to_string()];
 
 let mut result3 = {
     let vec_2 = vec_2.iter().collect::<Vec<_>>();
@@ -399,14 +451,14 @@ This implementation makes the following features in collection comprehension una
 
 # Differences
 * Ownership consumption:
-* Collection comprehension:
+  * Collection comprehension:
     * Using & or .iter() does not consume ownership
     * Directly passing the variable name consumes ownership
-* Iterator comprehension:
+  * Iterator comprehension:
     * Always does not consume ownership, but only allows passing in a single identifier and range expression that does not follow any method calls
 
 * Differences in features:
-* if let expression
+  * if let expression
     * Collection comprehension: supported
     * Iterator comprehension: not supported
 
@@ -416,16 +468,36 @@ This implementation makes the following features in collection comprehension una
 use better_comprehension::vector;
 use std::collections::{HashMap, BTreeMap};
 // Create a 3x3 matrix
+// python-like
 let matrix = vector![
-    vector![i * 3 + j + 1 for j in 0..3]
+    vector![i * 3 + j for j in 1..=3]
     for i in 0..3
+];
+// More recommended
+let matrix = vector![
+    row
+    for i in 0..3
+    let row = vector![
+        i * 3 + j
+        for j in 1..=3
+    ]
 ];
 
 // Transpose the matrix
+// python-like
 let transposed = vector![
 vector![row[i]
         for row in matrix.iter()]
 for i in 0..3
+];
+// More recommended
+let transposed = vector![
+    row
+    for i in 0..3
+    let row = vector![
+        row[i]
+        for row in matrix.iter()
+    ]
 ];
 // matrix is alive
 assert_eq!(matrix, vec![vec![1, 2, 3],
@@ -434,8 +506,8 @@ assert_eq!(matrix, vec![vec![1, 2, 3],
 assert_eq!(
     transposed,
     vec![vec![1, 4, 7],
-        vec![2, 5, 8],
-        vec![3, 6, 9]]
+         vec![2, 5, 8],
+         vec![3, 6, 9]]
 );
 ```
 
@@ -509,11 +581,11 @@ let math_scores: HashMap<&String, u8> = hash_map![
 assert_eq!(
     math_scores,
     HashMap::from([(&"Alice".to_string(), 95),
-                (&"Bob".to_string(), 78)]));
+                   (&"Bob".to_string(), 78)]));
 
 // use for loop
-let high_scores = {
-    let mut high_scores = BTreeMap::new();
+let name_high_scores_map = {
+    let mut name_high_scores_map = BTreeMap::new();
     for student in &students_data {
         let mut subjects = Vec::new();
         for score in &student.scores {
@@ -521,20 +593,30 @@ let high_scores = {
                 subjects.push(score.subject);
             }
         }
-        high_scores.insert(&student.name, subjects);
+        name_high_scores_map.insert(&student.name, subjects);
     }
-    high_scores
+    name_high_scores_map
 };
 // ↓ Equivalent to ↓
-// use comprehension!
-let high_scores = b_tree_map![
+// use comprehension! (python-like)
+let name_high_scores_map = b_tree_map![
     &student.name =>
         vector![score.subject for score in &student.scores if score.score >= 85]
     for student in &students_data
 ];
+// ↓ Equivalent to ↓
+// More recommended
+let name_high_scores_map = b_tree_map![
+    &student.name => subjects
+    for student in &students_data
+    let subjects = vector![
+        score.subject
+        for score in &student.scores if score.score >= 85
+    ]
+];
 
 assert_eq!(
-    high_scores,
+    name_high_scores_map,
     BTreeMap::from([
         (&"Alice".to_string(), vec!["Math", "English"]),
         (&"Bob".to_string(), vec!["English"])

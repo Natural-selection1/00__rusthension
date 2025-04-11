@@ -120,6 +120,57 @@
 //! assert_eq!(b_tree_set, BTreeSet::from([1, 13]));
 //! ```
 //!
+//!
+//! # let expression
+//! The scope of a let expression is the nearest for in expression above it, and it is affected by the filtering result of the if expression (if any). There can be multiple let expressions, and they are read from top to bottom.
+//!
+//! Equivalent to
+//! ```ignore
+//! for pattern in collection {
+//!     // if there is an if expression
+//!     if ... {
+//!     let ...;
+//!     let ...;
+//!
+//!     }
+//! }
+//! ```
+//!
+//! ## use let expression to bind variables
+//! ```rust
+//! use better_comprehension::vector;
+//! let vec = vector![
+//!     b
+//!     for x in 1..=3 if x != 2
+//!     let __x__ = x*2
+//!     for y in 4..=6 if y+__x__ != 7
+//!     let z = __x__ + y
+//!     let a = z*2
+//!     let b = match z {
+//!         5..=6 => 1,
+//!         7..=8 => 2,
+//!         _ => 3
+//!     }
+//! ];
+//! assert_eq!(vec, vec![1, 2, 3, 3, 3]);
+//! ```
+//!
+//! ## use let _ = or let () = to execute arbitrary code
+//! This is a very powerful feature, please use it with caution
+//! ```rust
+//! use better_comprehension::vector;
+//! let vec = vector![
+//!     x
+//!     for x in 1..=3
+//!     let _ = println!("{}", x)
+//!     let () = {
+//!         for i in 1..=3 {
+//!             println!("{}", i);
+//!         }
+//!     }
+//! ];
+//! ```
+//!
 //! # Use pattern matching
 //! ```rust
 //! use better_comprehension::vec_deque;
@@ -169,6 +220,7 @@
 //!
 //! # Execute code in block before returning
 //! This is a very powerful feature, you can execute any code before returning but it will reduce readability, please use it with caution
+//! If possible, it is recommended to use `let _ =` or `let () =` to execute code after the last `for in` instead
 //! ```rust
 //! use better_comprehension::vector;
 //! let vec_1 = vec!["123".to_string(), "456".to_string()];
@@ -416,16 +468,36 @@
 //! use better_comprehension::vector;
 //! use std::collections::{HashMap, BTreeMap};
 //! // Create a 3x3 matrix
+//! // python-like
 //! let matrix = vector![
-//!     vector![i * 3 + j + 1 for j in 0..3]
+//!     vector![i * 3 + j for j in 1..=3]
 //!     for i in 0..3
+//! ];
+//! // More recommended
+//! let matrix = vector![
+//!     row
+//!     for i in 0..3
+//!     let row = vector![
+//!         i * 3 + j
+//!         for j in 1..=3
+//!     ]
 //! ];
 //!
 //! // Transpose the matrix
+//! // python-like
 //! let transposed = vector![
 //! vector![row[i]
 //!         for row in matrix.iter()]
 //! for i in 0..3
+//! ];
+//! // More recommended
+//! let transposed = vector![
+//!     row
+//!     for i in 0..3
+//!     let row = vector![
+//!         row[i]
+//!         for row in matrix.iter()
+//!     ]
 //! ];
 //! // matrix is alive
 //! assert_eq!(matrix, vec![vec![1, 2, 3],
@@ -512,8 +584,8 @@
 //!                    (&"Bob".to_string(), 78)]));
 //!
 //! // use for loop
-//! let high_scores = {
-//!     let mut high_scores = BTreeMap::new();
+//! let name_high_scores_map = {
+//!     let mut name_high_scores_map = BTreeMap::new();
 //!     for student in &students_data {
 //!         let mut subjects = Vec::new();
 //!         for score in &student.scores {
@@ -521,20 +593,30 @@
 //!                 subjects.push(score.subject);
 //!             }
 //!         }
-//!         high_scores.insert(&student.name, subjects);
+//!         name_high_scores_map.insert(&student.name, subjects);
 //!     }
-//!     high_scores
+//!     name_high_scores_map
 //! };
 //! // ↓ Equivalent to ↓
-//! // use comprehension!
-//! let high_scores = b_tree_map![
+//! // use comprehension! (python-like)
+//! let name_high_scores_map = b_tree_map![
 //!     &student.name =>
 //!         vector![score.subject for score in &student.scores if score.score >= 85]
 //!     for student in &students_data
 //! ];
+//! // ↓ Equivalent to ↓
+//! // More recommended
+//! let name_high_scores_map = b_tree_map![
+//!     &student.name => subjects
+//!     for student in &students_data
+//!     let subjects = vector![
+//!         score.subject
+//!         for score in &student.scores if score.score >= 85
+//!     ]
+//! ];
 //!
 //! assert_eq!(
-//!     high_scores,
+//!     name_high_scores_map,
 //!     BTreeMap::from([
 //!         (&"Alice".to_string(), vec!["Math", "English"]),
 //!         (&"Bob".to_string(), vec!["English"])
