@@ -510,25 +510,66 @@ fn some_real_example_2() {
 
 #[test]
 fn some() {
-use better_comprehension::iterator_ref;
-let vec_1 = ["123".to_string(),
-             "456".to_string(),
-             "789".to_string()];
-let vec_2 = ["ABC".to_string(),
-             "DEF".to_string(),
-             "GHI".to_string()];
+    #[derive(Debug, PartialEq, Eq)]
+    struct Score {
+        subject: &'static str,
+        score: u8,
+    }
+    #[derive(Debug, PartialEq, Eq)]
+    struct Student {
+        name: String,
+        age: u8,
+        scores: Vec<Score>,
+    }
 
-let mut result3 = iterator_ref![
-    (x.clone(), y.clone()) if x.contains("1") else (y.clone(), x.clone())
-    for x in vec_1 if x.contains("1") || x.contains("7")
-    for i in 1..=2
-    for y in vec_2 if y.contains("D") || x.contains("3")];
+    let students_data = [
+        Student {
+            name: "Alice".to_string(),
+            age: 20,
+            scores: vec![
+                Score {
+                    subject: "Math",
+                    score: 95,
+                },
+                Score {
+                    subject: "English",
+                    score: 88,
+                },
+            ],
+        },
+        Student {
+            name: "Bob".to_string(),
+            age: 21,
+            scores: vec![
+                Score {
+                    subject: "Math",
+                    score: 78,
+                },
+                Score {
+                    subject: "English",
+                    score: 85,
+                },
+            ],
+        },
+    ];
 
-// still alive
-println!("{:?}", vec_1);
-println!("{:?}", vec_2);
+    let high_scores = b_tree_map![
+        &student.name => high_scores
+        for student in &students_data
+            let high_scores = vector![
+                score.subject
+                for score in &student.scores if score.score >= 85
+            ]
+            let _ = {
+                println!("{}", high_scores.len());
+            }
+    ];
 
-for _ in 0..=9 {
-    println!("{:?}", result3.next());
-}
+    assert_eq!(
+        high_scores,
+        BTreeMap::from([
+            (&"Alice".to_string(), vec!["Math", "English"]),
+            (&"Bob".to_string(), vec!["English"])
+        ])
+    );
 }

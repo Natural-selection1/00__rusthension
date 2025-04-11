@@ -7,6 +7,7 @@ use syn::parse::ParseStream;
 pub struct IterClause {
     pub for_in_clause: ForInClause,
     pub if_clause: Option<BareIfClause>,
+    pub let_clauses: Vec<LetClause>,
 }
 
 impl syn::parse::Parse for IterClause {
@@ -14,10 +15,15 @@ impl syn::parse::Parse for IterClause {
         let mut iter_clause = Self {
             for_in_clause: input.parse::<ForInClause>()?,
             if_clause: None,
+            let_clauses: vec![],
         };
 
         if input.peek(syn::Token![if]) {
             iter_clause.if_clause = Some(input.parse::<BareIfClause>()?);
+        }
+
+        while input.peek(syn::Token![let]) {
+            iter_clause.let_clauses.push(input.parse::<LetClause>()?);
         }
 
         Ok(iter_clause)
@@ -59,7 +65,19 @@ impl syn::parse::Parse for BareIfClause {
     }
 }
 
-/* ------------------------------------ */
+/* ----------------LetClause-------------------- */
+#[derive(Debug)]
+pub struct LetClause {
+    pub let_expr: Expr,
+}
+
+impl syn::parse::Parse for LetClause {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            let_expr: input.parse::<Expr>()?,
+        })
+    }
+}
 
 #[cfg(test)]
 mod tests {

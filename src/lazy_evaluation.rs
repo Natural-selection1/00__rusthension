@@ -1,4 +1,4 @@
-use crate::iter_clause::{BareIfClause, ForInClause, IterClause};
+use crate::iter_clause::{BareIfClause, ForInClause, IterClause, LetClause};
 use crate::mapping::{Mapping, MappingElse};
 
 use quote::quote;
@@ -68,6 +68,7 @@ impl quote::ToTokens for IteratorRef {
             let IterClause {
                 for_in_clause: ForInClause { pat, iterable },
                 if_clause,
+                let_clauses,
             } = iter_clause;
             info_container.depth += 1;
 
@@ -88,6 +89,14 @@ impl quote::ToTokens for IteratorRef {
                     Some(BareIfClause { conditions }) => quote! { #conditions },
                     None => quote! { true },
                 };
+
+                let mut let_clauses: Vec<&LetClause> = let_clauses.iter().collect();
+                while let Some(LetClause { let_expr }) = let_clauses.pop() {
+                    nested_code = quote! {
+                        #let_expr;
+                        #nested_code
+                    };
+                }
 
                 nested_code = quote! {
                     (#iterable)

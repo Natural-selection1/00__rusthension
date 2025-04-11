@@ -16,25 +16,26 @@ pub use linked_list::LinkedListComprehension;
 pub use vec_deque::VecDequeComprehension;
 pub use vector::VecComprehension;
 
-use crate::iter_clause::{BareIfClause, ForInClause, IterClause};
+use crate::iter_clause::{BareIfClause, ForInClause, IterClause, LetClause};
 
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Expr;
 
-pub(crate) fn handle_nested_loops<'a>(
-    iter_clauses: &'a [IterClause],
+pub(crate) fn handle_nested_loops(
+    iter_clauses: &[IterClause],
     mut nested_code: TokenStream,
 ) -> TokenStream {
-    let mut need_to_shadow: Vec<&'a Expr> = vec![];
+    let mut need_to_shadow: Vec<&Expr> = vec![];
 
     // 遍历iter_clauses(因为越向后层次越深, 所以直接pop就行了)
-    let mut iter_clauses: Vec<&'a IterClause> = iter_clauses.iter().collect();
+    let mut iter_clauses: Vec<&IterClause> = iter_clauses.iter().collect();
 
     while let Some(iter_clause) = iter_clauses.pop() {
         let IterClause {
             for_in_clause: ForInClause { pat, iterable },
             if_clause,
+            let_clauses,
         } = iter_clause;
 
         let iterable_code = match iterable {
@@ -56,6 +57,14 @@ pub(crate) fn handle_nested_loops<'a>(
             }
             _ => panic!("type is not supported: \n{:#?}", iterable),
         };
+
+        let mut let_clauses: Vec<&LetClause> = let_clauses.iter().collect();
+        while let Some(LetClause { let_expr }) = let_clauses.pop() {
+            nested_code = quote! {
+                #let_expr;
+                #nested_code
+            };
+        }
 
         // 根据是否有if条件生成循环代码
         nested_code = match if_clause {
