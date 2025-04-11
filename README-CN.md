@@ -8,6 +8,7 @@
     * [comprehension](https://crates.io/crates/comprehension)
     * [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
     * [iter-comprehensions](https://crates.io/crates/iter-comprehensions)
+    * [list_comprehension](https://crates.io/crates/list_comprehension)
     * [cute](https://crates.io/crates/cute)
 
 部分覆盖的库 :
@@ -17,9 +18,7 @@
 
   * 暂未支持while loop
 
-* [list_comprehension](https://crates.io/crates/list_comprehension)
-  * 暂未支持let else变量绑定
-    (不计划支持, 过分提高了 for in 部分的复杂度, 这些事情完全可以在映射返回块中解决)
+
 
 
 # 说明

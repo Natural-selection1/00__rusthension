@@ -11,6 +11,7 @@ Fully covered libraries:
 * [comprehension](https://crates.io/crates/comprehension)
 * [kt-list-comprehensions](https://crates.io/crates/kt-list-comprehensions)
 * [iter-comprehensions](https://crates.io/crates/iter-comprehensions)
+* [list_comprehension](https://crates.io/crates/list_comprehension)
 * [cute](https://crates.io/crates/cute)
 
 Partially covered libraries:
@@ -21,10 +22,6 @@ Partially covered libraries:
 
   * Does not support while loop
 
-* [list_comprehension](https://crates.io/crates/list_comprehension)
-  * Does not support let-else variable binding
-
-    (No plans to support this, as it overly complicates the for-in part, and these things can be completely solved in the mapping return block)
 
 # Collection Comprehensions
 
