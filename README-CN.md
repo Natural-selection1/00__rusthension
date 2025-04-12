@@ -1,4 +1,4 @@
-# better_comprehension
+# 更好的推导式
 
 在rust中的集合推导式和迭代器推导式, 提供更好的Rust使用体验
 
@@ -17,23 +17,50 @@
     (不计划支持, 因为本库已经提供了所有rust标准库中的集合类型)
 
   * 暂未支持while loop
-
-
+    (不计划支持, [使用let表达式](#let-表达式)就已经足够强大了)
 
 
 # 说明
-
-语法源自 [python推导式](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)
+语法源自 [python推导式](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions), 但提供了更为强大的功能, 更接近 rust 的使用习惯
 
 本库为Rust标准库中的所有集合类型提供推导式宏
 ( Vec 和 std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque})
 
 以及基于引用的迭代器推导式宏
 
+## 语法总览
+值容器
+
+left_mapping < if `conditions` else `right_mapping` >?
+< for `pattern` in `iterable` < if `conditions` >?
+< let `expression` >* >+
+
+
+[键值对容器](#键值对容器类型)
+
+支持三种键值对表示方式, 分别是 `=>` `,` `:`
+以下使用 `=>` 作为例子
+
+`left_key`=>`left_value` < if `conditions` else `right_key`=>`right_value`>?
+< for `pattern` in `iterable` < if `conditions` >?
+< let `expression` >* >+
+
+`?` 表示可选
+`+` 表示至少出现一次
+`*` 表示出现0次或多次
+换行不是必须的, 只是为了可读性
+
+`left/right_mapping/key/value` 是产生一个值的表达式, 可以是[简单表达式](#简单示例), 也可以是[块表达式](#使用块在返回前执行代码)
+
+`if conditions` 是一个产生bool的表达式
+
+`for pattern in iterable` 其中 `pattern` 是[模式](#使用模式匹配), `iterable` 是可迭代对象
+
+`let expression` 是一个let表达式, 可以[绑定变量](#使用let表达式绑定变量) 或者[执行任意代码](#使用-let-_--或-let---执行任意代码)
+
 
 
 # 集合推导式
-
 你可以完全将集合推导式宏视为 `for` 循环的语法糖
 (事实上, 这些宏就是使用 `for` 循环实现的)
 所以你可以看到很多很熟悉的语法

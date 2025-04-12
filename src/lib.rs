@@ -23,6 +23,49 @@ Partially covered libraries:
 
   * Does not support while loop
 
+    (No plans to support this, [using let expression](#let-expression) is already powerful enough)
+
+# Overview
+The syntax is derived from [python comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions), but provides more powerful features, closer to the usage of Rust
+
+This library provides comprehension macros for all collection types in the Rust standard library
+
+( Vec and std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque})
+
+And provides iterator comprehension macros based on references
+
+## Syntax
+Value container
+```ignore
+left_mapping <if conditions else right_mapping>?
+<for pattern in iterable <if conditions>?
+<let expression>*>+
+```
+
+[Key-value container](#key-value-collection-types)
+
+Supports three key-value pair representations, which are `=>` `,` `:`
+
+The following uses `=>` as an example
+
+```ignore
+left_key=>left_value <if conditions else right_key=>right_value>?
+<for pattern in iterable <if conditions>?
+<let expression>*>+
+```
+
+*`?` means optional*
+
+*`+` means at least once*
+
+*`*` means 0 times or more times*
+
+*It is not required to break lines, it is just for readability*
+
+* `left/right_mapping/key/value` is an expression that produces a value, which can be a [simple expression](#simple-example), or a [block expression](#execute-code-in-block-before-returning)
+* `if conditions` is an expression that produces a bool
+* `for pattern in iterable` where `pattern` is a [pattern](#use-pattern-matching), and `iterable` is an iterable object
+* `let expression` is a let expression, which can [bind variables](#use-let-expression-to-bind-variables) or [execute arbitrary code](#use-let-_--or-let---to-execute-code)
 
 # Collection Comprehensions
 
