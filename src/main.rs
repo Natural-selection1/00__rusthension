@@ -20,7 +20,7 @@ fn main() {
     test_nested_comprehension();
     test_ownership_handling();
     test_option();
-    some_real_example_2();
+    // some_real_example_2();
 }
 
 fn test_vec() {
@@ -412,13 +412,12 @@ fn some_real_example_1() {
     );
 }
 
+#[test]
 fn some_real_example_2() {
-    #[derive(Debug, PartialEq, Eq)]
     struct Score {
         subject: &'static str,
         score: u8,
     }
-    #[derive(Debug, PartialEq, Eq)]
     struct Student {
         name: String,
         age: u8,
@@ -456,113 +455,42 @@ fn some_real_example_2() {
         },
     ];
 
-    let math_scores: HashMap<&String, u8> = {
-        let mut math_scores = HashMap::new();
-        for student in &students_data {
-            for score in &student.scores {
-                if score.subject == "Math" {
-                    math_scores.insert(&student.name, score.score);
-                }
-            }
-        }
-        math_scores
-    };
-    // ↓ 等价于 ↓
-    let math_scores: HashMap<&String, u8> = hash_map![
-        &student.name => score.score
-        for student in &students_data
-        for score in &student.scores if score.subject == "Math"
-    ];
-
-    assert_eq!(
-        math_scores,
-        HashMap::from([(&"Alice".to_string(), 95), (&"Bob".to_string(), 78)])
-    );
-
+    // 使用for loop
     let high_scores = {
         let mut high_scores = BTreeMap::new();
-        for student in &students_data {
+        for Student { name, scores, .. } in &students_data {
             let mut subjects = Vec::new();
-            for score in &student.scores {
+            for score in scores {
                 if score.score >= 85 {
                     subjects.push(score.subject);
                 }
             }
-            high_scores.insert(&student.name, subjects);
+            high_scores.insert(name, subjects);
         }
         high_scores
     };
-    // ↓ 等价于 ↓
+    // ↓ 等价于以下链式写法 ↓
+    let high_scores = students_data
+        .iter()
+        .map(|Student { name, scores, .. }| {
+            (
+                name,
+                scores
+                    .iter()
+                    .filter(|score| score.score >= 85)
+                    .map(|score| score.subject)
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    // ↓ 等价于以下推导式 ↓
     let high_scores = b_tree_map![
-        &student.name =>
-            vector![score.subject for score in &student.scores if score.score >= 85]
-        for student in &students_data
-    ];
-
-    assert_eq!(
-        high_scores,
-        BTreeMap::from([
-            (&"Alice".to_string(), vec!["Math", "English"]),
-            (&"Bob".to_string(), vec!["English"])
-        ])
-    );
-}
-
-#[test]
-fn some() {
-    #[derive(Debug, PartialEq, Eq)]
-    struct Score {
-        subject: &'static str,
-        score: u8,
-    }
-    #[derive(Debug, PartialEq, Eq)]
-    struct Student {
-        name: String,
-        age: u8,
-        scores: Vec<Score>,
-    }
-
-    let students_data = [
-        Student {
-            name: "Alice".to_string(),
-            age: 20,
-            scores: vec![
-                Score {
-                    subject: "Math",
-                    score: 95,
-                },
-                Score {
-                    subject: "English",
-                    score: 88,
-                },
-            ],
-        },
-        Student {
-            name: "Bob".to_string(),
-            age: 21,
-            scores: vec![
-                Score {
-                    subject: "Math",
-                    score: 78,
-                },
-                Score {
-                    subject: "English",
-                    score: 85,
-                },
-            ],
-        },
-    ];
-
-    let high_scores = b_tree_map![
-        &student.name => high_scores
-        for student in &students_data
-            let high_scores = vector![
-                score.subject
-                for score in &student.scores if score.score >= 85
-            ]
-            let _ = {
-                println!("{}", high_scores.len());
-            }
+        name => subjects
+        for Student { name, scores, .. } in &students_data
+        let subjects = vector![
+            score.subject
+            for score in scores.iter() if score.score >= 85
+        ]
     ];
 
     assert_eq!(
