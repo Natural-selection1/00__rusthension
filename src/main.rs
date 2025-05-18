@@ -501,3 +501,6 @@ fn some_real_example_2() {
         ])
     );
 }
+
+fn test() {
+}
