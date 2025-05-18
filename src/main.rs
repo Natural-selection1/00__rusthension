@@ -503,5 +503,6 @@ fn some_real_example_2() {
 }
 
 fn test() {
+    let branch_1 = 1;
     let branch_2 = 2; // 我修改了过去, 为branch_2添加了注释
 }
