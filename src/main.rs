@@ -503,4 +503,5 @@ fn some_real_example_2() {
 }
 
 fn test() {
+    let branch_1 = 1;
 }
